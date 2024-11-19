@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { add } from "../../store/CartSlice";
 import { getBeats } from "../../store/BeatSlice";
+import { Link } from "react-router-dom";
 
 export const AllBeatsPage = () => {
   const dispatch = useDispatch();
@@ -33,10 +34,14 @@ export const AllBeatsPage = () => {
             key={beat.id}
             className="bg-white shadow-md rounded-lg overflow-hidden p-4"
           >
-            <img src={beat.image}/>
+            <img src={beat.image} />
             <h2 className="text-xl font-semibold text-gray-800">
               {beat.title}
             </h2>
+            <h2 className="text-xl font-semibold text-gray-800">
+              by {beat.producer} producer
+            </h2>
+
             <p className="text-gray-600 mt-2">Genre: {beat.genre}</p>
             <p className="text-gray-600">Price: Ksh. {beat.price}</p>
             <p className="text-gray-500 text-sm">
@@ -47,6 +52,12 @@ export const AllBeatsPage = () => {
               <source src={beat.audio_file} type="audio/mpeg" />
               Your browser does not support the audio tag.
             </audio>
+
+            <Link to={`/beat/${beat.id}`}>
+              <button className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all">
+                View Details
+              </button>
+            </Link>
 
             <button
               onClick={() => addToCart(beat)}

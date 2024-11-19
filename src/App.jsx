@@ -3,6 +3,7 @@ import { BeatDetails } from "./components/BeatDetails/BeatDetails";
 import { Cart } from "./components/Cart/Cart";
 import { CategoryList } from "./components/CategoryList/CategoryList";
 import { LandingPage } from "./components/LandingPage/LandingPage";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -17,8 +18,9 @@ export default function App() {
         <Route path="/LandingPage" element={<LandingPage />} />
         <Route path="/BeatCard" element={<BeatCard />} />
         <Route path="/BeatDetails" element={<BeatDetails />} />
-        <Route path="/Cart" element={<Cart/>} />
-        <Route path="/CategoryList" element={<CategoryList/>} />
+        <Route path="/Cart" element={<Cart />} />
+        <Route path="/CategoryList" element={<CategoryList />} />
+        <Route path="/beat/:id" element={<BeatDetails />} />
       </Routes>
     </Router>
   );

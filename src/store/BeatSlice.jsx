@@ -5,15 +5,23 @@ const initialState = {
   status: "idle",
 };
 
+//fetching using create thunk
+export const getBeats = createAsyncThunk("beat/get", async () => {
+  const data = await fetch("http://127.0.0.1:8000/beats/api/beat/");
+  const result = await data.json();
+  return result;
+});
+//fetching id using create thunk
+export const getBeatById = createAsyncThunk("beat/getById", async (id) => {
+  const response = await fetch(`http://127.0.0.1:8000/beats/api/beat/${id}/`);
+  const result = await response.json();
+  return result;
+});
+
 const beatSlice = createSlice({
   name: "beat",
   initialState,
-  //handles synchronous tasks
-  // reducers: {
-  //   // fetchBeat(state, action) {
-  //   //   state.data = action.payload;
-  //   // },
-  // },
+
   //handles async tasks in updating state
   extraReducers: (builder) => {
     //lets hanlde the pending status with a 'loading text'
@@ -28,26 +36,23 @@ const beatSlice = createSlice({
       })
       .addCase(getBeats.rejected, (state, action) => {
         state.status = "error";
+      })
+
+      // Fetching beat by ID
+      .addCase(getBeatById.pending, (state) => {
+        state.detailsStatus = "Loading";
+        state.beatDetails = null; // Clear previous details while loading
+      })
+      .addCase(getBeatById.fulfilled, (state, action) => {
+        state.beatDetails = action.payload;
+        state.detailsStatus = "Idle";
+      })
+      .addCase(getBeatById.rejected, (state, action) => {
+        state.detailsStatus = "error";
+        state.error = action.error.message;
       });
   },
 });
 
-// exporting actions
-//export const { fetchBeat } = beatSlice.actions;
-
 // exporting reducers
 export default beatSlice.reducer;
-//fetching using create thunk
-export const getBeats = createAsyncThunk("beat/get", async () => {
-  const data = await fetch("http://127.0.0.1:8000/beats/api/beat/");
-  const result = await data.json();
-  return result;
-});
-
-// export function getBeat() {
-//   return async function getBeatThunk(dispatch, getState) {
-//     const data = await fetch("http://127.0.0.1:8000/beats/api/beat/");
-//     const result = await data.json();
-//     dispatch(fetchBeat(result));
-//   };
-// }

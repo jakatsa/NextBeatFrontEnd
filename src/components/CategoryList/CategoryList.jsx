@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../store/CategorySlice";
+import { Link } from "react-router-dom";
 
 export const CategoryList = () => {
   const dispatch = useDispatch();
@@ -8,7 +9,7 @@ export const CategoryList = () => {
 
   useEffect(() => {
     dispatch(getCategories());
-  }, []);
+  }, [dispatch]);
 
   if (status === "Loading") {
     return <p>Loading</p>;
@@ -20,9 +21,9 @@ export const CategoryList = () => {
     <>
       <div>Category List</div>
       {category.map((categories) => (
-        <div key={categories.id}>
+        <Link key={categories.id} to={`/categories/${categories.slug}`}>
           <h1>{categories.name}</h1>
-        </div>
+        </Link>
       ))}
     </>
   );
