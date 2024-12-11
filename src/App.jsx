@@ -9,6 +9,7 @@ import { CategoryList } from "./components/CategoryList/CategoryList";
 import { LandingPage } from "./components/LandingPage/LandingPage";
 import { SearchResults } from "./components/SearchResults/SearchResults";
 import { fetchSearchResults } from "./store/SearchSlice";
+import { CategoryPage } from "./components/CategoryPage/CategoryPage";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -107,6 +108,7 @@ export default function App() {
         <Route path="/CategoryList" element={<CategoryList />} />
         <Route path="/Search" element={<SearchResults query={query} />} />
         <Route path="/beat/:id" element={<BeatDetails />} />
+        <Route path="/categories/:slug" element={<CategoryPage />} />
       </Routes>
     </>
   );
