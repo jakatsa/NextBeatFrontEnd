@@ -1,8 +1,111 @@
-# React + Vite
+# NextBeat Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+The frontend of NextBeat is built using React, providing an interactive and dynamic user interface for managing and purchasing beats. This section of the application communicates with the backend through REST APIs, ensuring seamless data flow and user experience.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
+
+**Dynamic Beat Listing**:
+
+- Displays a list of beats fetched from the backend.
+- Supports filtering and sorting for an improved user experience.
+- **Cart Management**:
+  - Add beats to a cart and view selected items.
+- **Producer Dashboard**:
+  - Producer dashboard under development for product and order management.
+- **Client Dashboard**:
+  - Client dashboard underway for personalized user interaction.
+- **Payment and Checkout**:
+  - Payment and checkout functionalities are in progress for processing purchases.
+- **React Redux Integration**:
+  - Utilizes Redux with the `createSlice` function for state management and efficient data handling across the application.
+
+## Dependencies
+
+The project uses the following npm packages:
+
+- `@reduxjs/toolkit` ^2.3.0
+- `axios` ^1.7.7
+- `react` ^18.3.1
+- `react-dom` ^18.3.1
+- `react-redux` ^9.1.2
+- `react-router-dom` ^6.28.0
+- `redux` ^5.0.1
+- `redux-thunk` ^3.1.0
+- `tailwindcss`
+- `vite`
+
+## File Structure
+
+```
+frontend
+├── README.md             # Project documentation
+├── eslint.config.js      # ESLint configuration
+├── index.html            # Main HTML file
+├── node_modules          # Node.js modules
+├── package-lock.json     # Dependency lock file
+├── package.json          # Project dependencies and scripts
+├── postcss.config.js     # PostCSS configuration
+├── public                # Static assets
+├── src                   # Source code
+│   ├── App.css           # Application styles
+│   ├── App.jsx           # Root application component
+│   ├── assets            # Static assets (e.g., images, icons)
+│   ├── components        # Reusable components
+│   │   ├── AllBeatsPage  # Page to display all beats
+│   │   ├── BeatCard      # Individual beat card component
+│   │   ├── BeatDetails   # Detailed view of a specific beat
+│   │   ├── Cart          # Cart functionality component
+│   │   ├── CategoryBeats # List of beats in a category
+│   │   ├── CategoryList  # List of categories
+│   │   ├── CategoryPage  # Category-specific page
+│   │   ├── LandingPage   # Home page component
+│   │   ├── NavBar        # Navigation bar component
+│   │   └── SearchResults # Display search results
+│   ├── index.css         # Global styles
+│   ├── main.jsx          # Entry point
+│   └── store             # Redux store configuration
+├── tailwind.config.js    # Tailwind CSS configuration
+└── vite.config.js        # Vite configuration
+```
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18.x or later)
+- npm
+
+### Installation
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+
+   ```
+
+2. Configure Tailwind CSS:
+   Ensure the `tailwind.config.js` and `postcss.config.js` are properly set up, and include the required paths for Tailwind to process.
+
+3. Start the development server using Vite:
+
+   ```bash
+   npm run dev
+
+   ```
+
+4. Access the application at `http://localhost:8000/`.
+
+## Contribution
+
+Contributions are welcome! Fork the repository, create a new branch, and submit a pull request for review.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+## Contact
+
+For questions or support, please contact jakatsa5@gmail.com
