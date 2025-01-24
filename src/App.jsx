@@ -6,10 +6,10 @@ import { BeatCard } from "./components/BeatCard/BeatCard";
 import { BeatDetails } from "./components/BeatDetails/BeatDetails";
 import { Cart } from "./components/Cart/Cart";
 import { CategoryList } from "./components/CategoryList/CategoryList";
-import { LandingPage } from "./components/LandingPage/LandingPage";
+import { LandingPage}  from "./components/LandingPage/LandingPage";
 import { SearchResults } from "./components/SearchResults/SearchResults";
 import { fetchSearchResults } from "./store/SearchSlice";
-import { CategoryPage } from "./components/CategoryPage/CategoryPage";
+import  CategoryPage  from "./components/CategoryPage/CategoryPage";
 
 export default function App() {
   const [query, setQuery] = useState("");
