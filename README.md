@@ -21,6 +21,19 @@ The frontend of NextBeat is built using React, providing an interactive and dyna
 - **React Redux Integration**:
   - Utilizes Redux with the `createSlice` function for state management and efficient data handling across the application.
 
+
+## Completed Features
+
+**Dynamic Beat Listing**:
+
+- Displays a list of beats fetched from the backend.
+- Supports filtering and sorting for an improved user experience.
+
+- **Client Dashboard**:
+  - Client dashboard underway for personalized user interaction.
+
+- **Cart Management**:
+  - Add beats to a cart and view selected items.
 ## Dependencies
 
 The project uses the following npm packages:
