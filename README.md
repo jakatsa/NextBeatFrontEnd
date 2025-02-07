@@ -8,21 +8,37 @@ The frontend of NextBeat is built using React, providing an interactive and dyna
 
 **Dynamic Beat Listing**:
 
+- **Messaging Features**:
+  - Implementaion of a messaging dashboaord allowing clients to interact.
+
+**User Relationship Features**:
+
+- users are able to follow each other.
+
 - Displays a list of beats fetched from the backend.
-- Supports filtering and sorting for an improved user experience.
+- Supports filtering and sorting of beats for an improved user experience.
 - **Cart Management**:
   - Add beats to a cart and view selected items.
 - **Producer Dashboard**:
-  - Producer dashboard under development for product and order management.
+  -- Allows producers to manage their beats (upload and update) and order management.
 - **Client Dashboard**:
-  - Client dashboard underway for personalized user interaction.
+
+  - Allows users to view , purchase and search for beats .
+
 - **Payment and Checkout**:
   - Payment and checkout functionalities are in progress for processing purchases.
 - **React Redux Integration**:
   - Utilizes Redux with the `createSlice` function for state management and efficient data handling across the application.
+  - **UseAuth**:
+  - Enable users to sign up as client and producer using jwt tokens.
+    **Uploading beats**:
 
+-The user producer is able to upload beats to the platform
 
 ## Completed Features
+
+- **UseAuth**:
+- Enable users to login as client and producer using jwt tokens.
 
 **Dynamic Beat Listing**:
 
@@ -30,10 +46,16 @@ The frontend of NextBeat is built using React, providing an interactive and dyna
 - Supports filtering and sorting for an improved user experience.
 
 - **Client Dashboard**:
-  - Client dashboard underway for personalized user interaction.
+
+- Allows users to view , purchase and search for beats .
 
 - **Cart Management**:
   - Add beats to a cart and view selected items.
+
+**Uploading beats**:
+
+-The user producer is able to upload beats to the platform
+
 ## Dependencies
 
 The project uses the following npm packages:

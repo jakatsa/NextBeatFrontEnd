@@ -6,26 +6,37 @@ const initialState = {
   error: null,
 };
 
-// Async thunk to post a new beat (including audio and image files)
-export const addBeat = createAsyncThunk("beat/add", async (formData) => {
-  const response = await fetch("http://127.0.0.1:8000/beats/api/beat/", {
-    method: "POST",
-    body: formData,
-  });
-  if (!response.ok) {
-    throw new Error("Failed to add beat");
-  }
-  const result = await response.json();
-  return result;
-});
+// Async thunk to post a new beat with token
+export const addBeat = createAsyncThunk(
+  "beat/add",
+  async ({ formData, token }, { rejectWithValue }) => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/beats/api/beat/", {
+        method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token in the request
+        },
+      });
 
-//fetching beats using create thunk
+      if (!response.ok) {
+        throw new Error("Failed to add beat");
+      }
+
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const getBeats = createAsyncThunk("beat/get", async () => {
   const data = await fetch("http://127.0.0.1:8000/beats/api/beat/");
   const result = await data.json();
   return result;
 });
-//fetching beat by id using create thunk
+
 export const getBeatById = createAsyncThunk("beat/getById", async (id) => {
   const response = await fetch(`http://127.0.0.1:8000/beats/api/beat/${id}/`);
   const result = await response.json();
@@ -39,7 +50,6 @@ const beatSlice = createSlice({
   reducers: {},
 
   extraReducers: (builder) => {
-    // Fetching all beats
     builder
       .addCase(getBeats.pending, (state) => {
         state.status = "loading";
@@ -52,8 +62,6 @@ const beatSlice = createSlice({
         state.status = "error";
         state.error = action.error.message;
       })
-
-      // Fetching beat by ID
       .addCase(getBeatById.pending, (state) => {
         state.detailsStatus = "loading";
         state.beatDetails = null;
@@ -66,18 +74,16 @@ const beatSlice = createSlice({
         state.detailsStatus = "error";
         state.error = action.error.message;
       })
-
-      // Adding a new beat
       .addCase(addBeat.pending, (state) => {
         state.status = "loading";
       })
       .addCase(addBeat.fulfilled, (state, action) => {
         state.status = "idle";
-        state.data.push(action.payload);  // Add the new beat to the list
+        state.data.push(action.payload); // Add the new beat to the list
       })
       .addCase(addBeat.rejected, (state, action) => {
         state.status = "error";
-        state.error = action.error.message;
+        state.error = action.payload;
       });
   },
 });
