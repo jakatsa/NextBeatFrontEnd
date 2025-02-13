@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom"; // to get the category slug from URL
+import React, { useEffect, useState, useRef } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
 const CategoryPage = () => {
-  const { slug } = useParams(); // Get category slug from URL
+  const { slug } = useParams();
   const [categoryBeats, setCategoryBeats] = useState([]);
   const [category, setCategory] = useState(null);
   const [loading, setLoading] = useState(true);
+  const currentAudio = useRef(null); // Ref to keep track of the currently playing audio
 
   useEffect(() => {
     const fetchCategoryData = async () => {
       try {
-        // Fetch the category information based on the slug
         const categoryResponse = await axios.get(
           `http://127.0.0.1:8000/beats/api/categories/`
         );
@@ -21,7 +21,6 @@ const CategoryPage = () => {
         setCategory(currentCategory);
 
         if (currentCategory) {
-          // Fetch beats belonging to the current category
           const beatsResponse = await axios.get(
             `http://127.0.0.1:8000/beats/api/beat/`
           );
@@ -39,6 +38,13 @@ const CategoryPage = () => {
 
     fetchCategoryData();
   }, [slug]);
+
+  const handlePlay = (event) => {
+    if (currentAudio.current && currentAudio.current !== event.target) {
+      currentAudio.current.pause(); // Pause the previously playing audio
+    }
+    currentAudio.current = event.target;
+  };
 
   if (loading) {
     return <p>Loading...</p>;
@@ -59,14 +65,18 @@ const CategoryPage = () => {
               className="bg-white shadow-md rounded-lg overflow-hidden p-4"
             >
               <img
-                src={beat.image || "https://via.placeholder.com/150"} // Placeholder if no image
+                src={beat.image || "https://via.placeholder.com/150"}
                 alt={beat.title}
                 className="w-full h-48 object-cover mb-4"
               />
               <h3 className="text-lg font-semibold">{beat.title}</h3>
               <p className="text-gray-500">Genre: {beat.genre}</p>
               <p className="text-gray-500">Price: Ksh. {beat.price}</p>
-              <audio controls className="w-full mt-4">
+              <audio
+                controls
+                className="w-full mt-4"
+                onPlay={handlePlay} // Handle play event with useRef
+              >
                 <source src={beat.audio_file} type="audio/mpeg" />
                 Your browser does not support the audio element.
               </audio>

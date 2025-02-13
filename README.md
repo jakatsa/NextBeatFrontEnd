@@ -38,9 +38,9 @@ The frontend of NextBeat is built using React, providing an interactive and dyna
 ## Completed Features
 
 - **UseAuth**:
-- Enable users to login as client and producer using jwt tokens.
-
-**Dynamic Beat Listing**:
+- Enable users to login as client and producer.
+- Enable users to Register as client and producer.
+  **Dynamic Beat Listing**:
 
 - Displays a list of beats fetched from the backend.
 - Supports filtering and sorting for an improved user experience.

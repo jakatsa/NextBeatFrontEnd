@@ -6,19 +6,28 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    // action creator theres, add ,delete updateb etc
+    // Add item to the cart (prevent duplicates)
     add(state, action) {
-      state.push(action.payload);
+      const existingItem = state.find((item) => item.id === action.payload.id);
+      if (!existingItem) {
+        state.push(action.payload);
+      }
     },
-    remove(state,action){
-      return state.filter(item=>item.id !== action.payload)
 
-    }
+    // Remove item from the cart by id
+    remove(state, action) {
+      return state.filter((item) => item.id !== action.payload);
+    },
+
+    // Set the entire cart (useful for restoring from local storage)
+    setCart(state, action) {
+      return action.payload;
+    },
   },
 });
 
-// exporting actions
-export const { add,remove } = cartSlice.actions;
+// Exporting actions
+export const { add, remove, setCart } = cartSlice.actions;
 
-// exporting reducers
+// Exporting reducer
 export default cartSlice.reducer;

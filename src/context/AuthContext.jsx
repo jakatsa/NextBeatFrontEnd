@@ -1,7 +1,7 @@
 import { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode"; // Correct the import
-import { useNavigate } from "react-router-dom"; // Replace useHistory with useNavigate
-import Swal from "sweetalert2"; // Import SweetAlert2 properly
+import { jwtDecode } from "jwt-decode";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const AuthContext = createContext();
 
@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
   );
 
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate(); // Use navigate instead of useHistory
+  const navigate = useNavigate();
 
   const loginUser = async (email, password) => {
     const response = await fetch("http://127.0.0.1:8000/api/v1/token/", {
@@ -67,31 +67,42 @@ export const AuthProvider = ({ children }) => {
   };
 
   const registerUser = async (
-    image,
     bio,
     bank_details,
     contacts,
     name,
     email,
-    username,
+    role,
+    user_name,
     password,
     password2
   ) => {
+    // Build the payload conditionally based on the user role
+    const payload = {
+      name,
+      email,
+      user_name,
+      password,
+      password2,
+      role,
+    };
+
+    // Include these fields only if the role is "producer"
+    if (role === "producer") {
+      payload.bio = bio;
+      payload.bank_details = bank_details;
+      payload.contacts = contacts;
+    }
+
     const response = await fetch("http://127.0.0.1:8000/api/v1/register/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name,
-        email,
-        username,
-        password,
-        password2,
-        image,
-        bio,
-        bank_details,
-        contacts,
-      }),
+      body: JSON.stringify(payload),
     });
+
+    const data = await response.json();
+    console.log(data);
+
     if (response.status === 201) {
       navigate("/login");
       Swal.fire({

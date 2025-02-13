@@ -5,11 +5,9 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { ClientHomepage } from "./components/UserAuth/ClientHomepage";
 import { ProducerHomePage } from "./components/UserAuth/ProducerHomePage";
-import { Register } from "./components/UserAuth/Register";
+import Register from "./components/UserAuth/Register";
 import { Login } from "./components/UserAuth/Login";
 import ClientLogin from "./components/UserAuth/ClientLogin";
-import { ProducerLogin } from "./components/UserAuth/ProducerLogin";
-
 import PrivateRoute from "./utils/PrivateRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { LandingPage } from "./components/LandingPage/LandingPage";
@@ -20,6 +18,8 @@ import { CategoryList } from "./components/CategoryList/CategoryList";
 import { SearchResults } from "./components/SearchResults/SearchResults";
 import CategoryPage from "./components/CategoryPage/CategoryPage";
 import { fetchSearchResults } from "./store/SearchSlice";
+import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
+import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -97,6 +97,23 @@ export default function App() {
                 Cart: {searchResults?.length || 0}
               </Link>
             </li>
+            <li>
+              <Link
+                to="/ProducerRegistration"
+                className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+              >
+                Sell Beats ?
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                to="/ClientRegistration"
+                className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
+              >
+                Buy Beats ?
+              </Link>
+            </li>
           </ul>
         </div>
       </nav>
@@ -107,10 +124,18 @@ export default function App() {
         <Route path="/BeatCard" element={<BeatCard />} />
         <Route path="/Cart" element={<Cart />} />
         <Route path="/Search" element={<SearchResults query={query} />} />
+        <Route path="/" element={<CategoryList />} />
+        <Route path="/categories/:slug" element={<CategoryPage />} />
+        <Route path="/beat/:id" element={<BeatDetails />} />
+        <Route path="/ClientRegistration" element={<ClientRegistration />} />
+        <Route
+          path="/ProducerRegistration"
+          element={<ProducerRegistration />}
+        />
 
         <Route path="/Login" element={<Login />} />
         <Route path="/ClientLogin" element={<ClientLogin />} />
-        <Route path="/ProducerLogin" element={<ProducerLogin />} />
+
         <Route path="/Register" element={<Register />} />
         {/* Private Routes */}
         <Route element={<PrivateRoute />}>

@@ -26,8 +26,6 @@ export const CategoryBeats = () => {
     return <p>Error loading data</p>;
   }
 
-
-  
   return (
     <div className="container mx-auto">
       <h1 className="text-center text-2xl font-bold mb-6">Beats by Category</h1>
