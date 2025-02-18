@@ -6,6 +6,7 @@ export const ClientHomepage = () => {
   return (
     <>
       <div>ClientHomepage</div>
+
       <CategoryList />
       <AllBeatsPage />
     </>

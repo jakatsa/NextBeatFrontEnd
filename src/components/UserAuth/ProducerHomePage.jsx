@@ -5,6 +5,7 @@ export const ProducerHomePage = () => {
   return (
     <>
       <div>ProducerHomePage</div>
+
       <AddBeat />
     </>
   );

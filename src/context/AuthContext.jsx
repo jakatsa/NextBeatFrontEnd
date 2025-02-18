@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useCallback } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -8,54 +8,85 @@ const AuthContext = createContext();
 export default AuthContext;
 
 export const AuthProvider = ({ children }) => {
-  const [authTokens, setAuthTokens] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? JSON.parse(localStorage.getItem("authTokens"))
-      : null
-  );
-
-  const [user, setUser] = useState(() =>
-    localStorage.getItem("authTokens")
-      ? jwtDecode(localStorage.getItem("authTokens"))
-      : null
-  );
-
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const loginUser = async (email, password) => {
-    const response = await fetch("http://127.0.0.1:8000/api/v1/token/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await response.json();
+  // Initialize state from localStorage
+  const [authTokens, setAuthTokens] = useState(() => {
+    const tokens = localStorage.getItem("authTokens");
+    return tokens ? JSON.parse(tokens) : null;
+  });
 
-    if (response.status === 200) {
-      setAuthTokens(data);
-      const decodedToken = jwtDecode(data.access); // Decode the token here
-      setUser(decodedToken);
-      localStorage.setItem("authTokens", JSON.stringify(data));
+  const [user, setUser] = useState(() => {
+    const tokens = localStorage.getItem("authTokens");
+    return tokens ? jwtDecode(tokens) : null;
+  });
 
-      // Redirect based on user role
-      if (decodedToken.userType === "producer") {
-        navigate("/ProducerHomePage");
-      } else {
-        navigate("/ClientHomepage");
+  const [loading, setLoading] = useState(true);
+
+  // Effect to update user when authTokens change
+  useEffect(() => {
+    if (authTokens?.access) {
+      try {
+        const decodedUser = jwtDecode(authTokens.access);
+        setUser(decodedUser);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        logoutUser();
       }
-
-      Swal.fire({
-        title: "Login Successful",
-        icon: "success",
-        toast: true,
-        timer: 6000,
-        position: "top-right",
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
     } else {
+      setUser(null);
+    }
+    setLoading(false);
+  }, [authTokens]);
+
+  // Login Function
+  const loginUser = async (email, password) => {
+    try {
+      const response = await fetch("http://127.0.0.1:8000/api/v1/token/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (response.status === 200) {
+        localStorage.setItem("authTokens", JSON.stringify(data));
+        setAuthTokens(data);
+        setUser(jwtDecode(data.access));
+
+        // Redirect user based on role
+        const redirectPath =
+          jwtDecode(data.access).userType === "producer"
+            ? "/ProducerHomePage"
+            : "/ClientHomepage";
+        navigate(redirectPath);
+
+        // Show success message
+        Swal.fire({
+          title: "Login Successful",
+          icon: "success",
+          toast: true,
+          timer: 6000,
+          position: "top-right",
+          timerProgressBar: true,
+          showConfirmButton: false,
+        });
+
+        // 🔹 Force a full page reload to refresh UI
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        throw new Error(data.detail || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       Swal.fire({
-        title: "Username or password does not exist",
+        title: "Login failed",
+        text: error.message,
         icon: "error",
         toast: true,
         timer: 6000,
@@ -66,74 +97,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const registerUser = async (
-    bio,
-    bank_details,
-    contacts,
-    name,
-    email,
-    role,
-    user_name,
-    password,
-    password2
-  ) => {
-    // Build the payload conditionally based on the user role
-    const payload = {
-      name,
-      email,
-      user_name,
-      password,
-      password2,
-      role,
-    };
-
-    // Include these fields only if the role is "producer"
-    if (role === "producer") {
-      payload.bio = bio;
-      payload.bank_details = bank_details;
-      payload.contacts = contacts;
-    }
-
-    const response = await fetch("http://127.0.0.1:8000/api/v1/register/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await response.json();
-    console.log(data);
-
-    if (response.status === 201) {
-      navigate("/login");
-      Swal.fire({
-        title: "Registration Successful, Login Now",
-        icon: "success",
-        toast: true,
-        timer: 6000,
-        position: "top-right",
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-    } else {
-      Swal.fire({
-        title: `An Error Occurred: ${response.status}`,
-        icon: "error",
-        toast: true,
-        timer: 6000,
-        position: "top-right",
-        timerProgressBar: true,
-        showConfirmButton: false,
-      });
-    }
-  };
-
-  const logoutUser = () => {
+  // Logout Function
+  const logoutUser = useCallback(() => {
     setAuthTokens(null);
     setUser(null);
     localStorage.removeItem("authTokens");
     navigate("/login");
+
     Swal.fire({
-      title: "You have been logged out...",
+      title: "You have been logged out",
       icon: "success",
       toast: true,
       timer: 6000,
@@ -141,28 +113,30 @@ export const AuthProvider = ({ children }) => {
       timerProgressBar: true,
       showConfirmButton: false,
     });
-  };
+  }, [navigate]);
 
+  // Persist tokens in localStorage
+  useEffect(() => {
+    if (authTokens) {
+      localStorage.setItem("authTokens", JSON.stringify(authTokens));
+    } else {
+      localStorage.removeItem("authTokens");
+    }
+  }, [authTokens]);
+
+  // Provide context
   const contextData = {
     user,
     setUser,
     authTokens,
     setAuthTokens,
-    registerUser,
     loginUser,
     logoutUser,
   };
 
-  useEffect(() => {
-    if (authTokens) {
-      setUser(jwtDecode(authTokens.access));
-    }
-    setLoading(false);
-  }, [authTokens]);
-
   return (
     <AuthContext.Provider value={contextData}>
-      {loading ? null : children}
+      {!loading && children}
     </AuthContext.Provider>
   );
 };

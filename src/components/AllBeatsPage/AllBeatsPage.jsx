@@ -1,36 +1,156 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { add } from "../../store/CartSlice";
 import { getBeats } from "../../store/BeatSlice";
 import { Link } from "react-router-dom";
+import { PlayCircle, PauseCircle } from "lucide-react";
 
 export const AllBeatsPage = () => {
   const dispatch = useDispatch();
-  const { data: beats, status } = useSelector((state) => state.beat);
-  const currentAudio = useRef(null); // Keep track of the currently playing audio
+  const { data: beats } = useSelector((state) => state.beat);
+  const currentAudio = useRef(null);
+
+  const [activeBeat, setActiveBeat] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hoveredBeat, setHoveredBeat] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
     dispatch(getBeats());
   }, [dispatch]);
 
-  const handlePlay = (event) => {
-    if (currentAudio.current && currentAudio.current !== event.target) {
-      currentAudio.current.pause(); // Pause the previously playing audio
+  const handlePlayPause = (beatId) => {
+    let id = beatId || activeBeat;
+    if (!id && currentAudio.current) {
+      id = currentAudio.current.id.split("-")[1];
+      console.log("handlePlayPause: Using id from currentAudio:", id);
     }
-    currentAudio.current = event.target; // Update the reference to the current audio
+    if (!id) {
+      console.log("No valid id found. Exiting handlePlayPause.");
+      return;
+    }
+    const audioElement = document.getElementById(`audio-${id}`);
+    if (!audioElement) {
+      console.log("No audio element found for id:", id);
+      return;
+    }
+    console.log("handlePlayPause called", {
+      beatId,
+      determinedId: id,
+      activeBeat,
+      isPlaying,
+    });
+    console.log("Audio element found:", { id, paused: audioElement.paused });
+
+    // Pause any other audio that might be playing
+    if (currentAudio.current && currentAudio.current !== audioElement) {
+      console.log("Pausing currently playing audio:", currentAudio.current);
+      currentAudio.current.pause();
+    }
+
+    if (audioElement.paused) {
+      console.log("Playing audio element with id:", id);
+      audioElement.play();
+      currentAudio.current = audioElement;
+      setActiveBeat(id);
+      setIsPlaying(true);
+      setShowPlayer(true);
+    } else {
+      console.log("Pausing audio element with id:", id);
+      audioElement.pause();
+      setIsPlaying(false);
+      setActiveBeat(id);
+    }
+  };
+
+  const handleTimeUpdate = (e) => {
+    const audio = e.target;
+    console.log("handleTimeUpdate:", {
+      currentTime: audio.currentTime,
+      duration: audio.duration,
+      eventType: e.type,
+    });
+    setCurrentTime(audio.currentTime);
+    setProgress((audio.currentTime / audio.duration) * 100);
+  };
+
+  const handleLoadedMetadata = (e) => {
+    const audio = e.target;
+    console.log("handleLoadedMetadata:", {
+      duration: audio.duration,
+      eventType: e.type,
+    });
+    setDuration(audio.duration);
+  };
+
+  const handleSeek = (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (currentAudio.current) {
+      const boundingRect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - boundingRect.left;
+      const newTime =
+        (clickX / boundingRect.width) * currentAudio.current.duration;
+      console.log("handleSeek:", {
+        clickX,
+        boundingRect,
+        newTime,
+        duration: currentAudio.current.duration,
+        readyState: currentAudio.current.readyState,
+      });
+
+      // Attempt to set the new currentTime
+      currentAudio.current.currentTime = newTime;
+      console.log(
+        "Immediately after assignment, currentTime:",
+        currentAudio.current.currentTime
+      );
+
+      // Listen for the "seeked" event
+      const onSeeked = () => {
+        console.log(
+          "Audio seeked event fired, currentTime:",
+          currentAudio.current.currentTime
+        );
+        setCurrentTime(currentAudio.current.currentTime);
+        setProgress(
+          (currentAudio.current.currentTime / currentAudio.current.duration) *
+            100
+        );
+        currentAudio.current.removeEventListener("seeked", onSeeked);
+      };
+      currentAudio.current.addEventListener("seeked", onSeeked);
+
+      // Also check after a short delay
+      setTimeout(() => {
+        console.log(
+          "After timeout, currentTime:",
+          currentAudio.current.currentTime
+        );
+        setCurrentTime(currentAudio.current.currentTime);
+        setProgress(
+          (currentAudio.current.currentTime / currentAudio.current.duration) *
+            100
+        );
+      }, 100);
+    } else {
+      console.log("handleSeek: No currentAudio available.");
+    }
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
   const addToCart = (beat) => {
+    console.log("Adding beat to cart:", beat);
     dispatch(add(beat));
   };
-
-  if (status === "Loading") {
-    return <p className="text-center text-gray-500">Loading...</p>;
-  }
-
-  if (status === "error") {
-    return <p className="text-center text-red-500">Error fetching beats...</p>;
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -39,9 +159,25 @@ export const AllBeatsPage = () => {
         {beats.map((beat) => (
           <div
             key={beat.id}
-            className="bg-white shadow-md rounded-lg overflow-hidden p-4"
+            className="bg-white shadow-md rounded-lg overflow-hidden p-4 relative"
+            onMouseEnter={() => setHoveredBeat(beat.id)}
+            onMouseLeave={() => setHoveredBeat(null)}
           >
-            <img src={beat.image} alt={beat.title} />
+            <div className="relative">
+              <img src={beat.image} alt={beat.title} className="w-full" />
+              {hoveredBeat === beat.id && (
+                <button
+                  onClick={() => handlePlayPause(beat.id)}
+                  className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white"
+                >
+                  {activeBeat === beat.id && isPlaying ? (
+                    <PauseCircle size={50} />
+                  ) : (
+                    <PlayCircle size={50} />
+                  )}
+                </button>
+              )}
+            </div>
             <h2 className="text-xl font-semibold text-gray-800">
               {beat.title}
             </h2>
@@ -53,22 +189,22 @@ export const AllBeatsPage = () => {
             <p className="text-gray-500 text-sm">
               Created on: {new Date(beat.created_at).toLocaleDateString()}
             </p>
-
             <audio
-              controls
-              className="w-full mt-4"
-              onPlay={handlePlay} // Handle play event
+              id={`audio-${beat.id}`}
+              preload="auto"
+              // Instead of using a "hidden" class, you could use CSS to position offscreen
+              style={{ position: "absolute", left: "-9999px" }}
+              onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleLoadedMetadata}
             >
               <source src={beat.audio_file} type="audio/mpeg" />
               Your browser does not support the audio tag.
             </audio>
-
             <Link to={`/beat/${beat.id}`}>
               <button className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all">
                 View Details
               </button>
             </Link>
-
             <button
               onClick={() => addToCart(beat)}
               className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
@@ -78,6 +214,24 @@ export const AllBeatsPage = () => {
           </div>
         ))}
       </div>
+      {showPlayer && (
+        <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center">
+          <button onClick={() => handlePlayPause(activeBeat)} className="mr-4">
+            {isPlaying ? <PauseCircle size={40} /> : <PlayCircle size={40} />}
+          </button>
+          <span className="mr-2">{formatTime(currentTime)}</span>
+          <div
+            className="w-full bg-gray-600 h-2 rounded-full overflow-hidden relative cursor-pointer"
+            onClick={handleSeek}
+          >
+            <div
+              className="bg-blue-500 h-full"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+          <span className="ml-2">{formatTime(duration)}</span>
+        </div>
+      )}
     </div>
   );
 };

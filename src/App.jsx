@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import Swal from "sweetalert2";
 
 import { ClientHomepage } from "./components/UserAuth/ClientHomepage";
 import { ProducerHomePage } from "./components/UserAuth/ProducerHomePage";
@@ -9,7 +10,8 @@ import Register from "./components/UserAuth/Register";
 import { Login } from "./components/UserAuth/Login";
 import ClientLogin from "./components/UserAuth/ClientLogin";
 import PrivateRoute from "./utils/PrivateRoute";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "../src/context/AuthContext";
+import AuthContext from "../src/context/AuthContext";
 import { LandingPage } from "./components/LandingPage/LandingPage";
 import { BeatCard } from "./components/BeatCard/BeatCard";
 import { BeatDetails } from "./components/BeatDetails/BeatDetails";
@@ -22,6 +24,7 @@ import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
 import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
 
 export default function App() {
+  const { user, logoutUser } = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const searchResults = useSelector((state) => state.search.results);
   const dispatch = useDispatch();
@@ -32,7 +35,23 @@ export default function App() {
     if (query.trim() === "") return;
     dispatch(fetchSearchResults(query));
     navigate("/Search");
-    console.log("Search Query:", query);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Swal.fire({
+        title: "Logout failed",
+        icon: "error",
+        toast: true,
+        timer: 6000,
+        position: "top-right",
+        timerProgressBar: true,
+        showConfirmButton: false,
+      });
+    }
   };
 
   return (
@@ -52,24 +71,6 @@ export default function App() {
 
           <div className="flex md:order-2">
             <form onSubmit={handleSearch} className="relative hidden md:block">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <svg
-                  className="w-4 h-4 text-gray-500 dark:text-gray-400"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 20 20"
-                  aria-hidden="true"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                  />
-                </svg>
-                <span className="sr-only">Search</span>
-              </div>
               <input
                 type="text"
                 value={query}
@@ -82,43 +83,54 @@ export default function App() {
 
           <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
             <li>
-              <Link
-                to="/"
-                className="block py-2 pl-3 pr-4 text-blue-700 bg-blue-100 rounded md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500"
-              >
+              <Link to="/" className="block py-2 pl-3 pr-4 text-blue-700">
                 Home
               </Link>
             </li>
             <li>
-              <Link
-                to="/Cart"
-                className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-              >
+              <Link to="/Cart" className="block py-2 pl-3 pr-4 text-gray-900">
                 Cart: {searchResults?.length || 0}
               </Link>
             </li>
             <li>
-              <Link
-                to="/ProducerRegistration"
-                className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-              >
-                Sell Beats ?
+              <Link to="/ProducerRegistration" className="block py-2 pl-3 pr-4">
+                Sell Beats?
+              </Link>
+            </li>
+            <li>
+              <Link to="/ClientRegistration" className="block py-2 pl-3 pr-4">
+                Buy Beats?
               </Link>
             </li>
 
-            <li>
-              <Link
-                to="/ClientRegistration"
-                className="block py-2 pl-3 pr-4 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent"
-              >
-                Buy Beats ?
-              </Link>
-            </li>
+            {user ? (
+              <li>
+                <button
+                  onClick={handleLogout}
+                  className="block py-2 px-4 text-white bg-red-500 rounded"
+                >
+                  Logout
+                </button>
+              </li>
+            ) : (
+              <>
+                <li>
+                  <Link to="/Login" className="block py-2 pl-3 pr-4">
+                    Login
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/Register" className="block py-2 pl-3 pr-4">
+                    Register
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </nav>
+
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Navigate to="/LandingPage" />} />
         <Route path="/LandingPage" element={<LandingPage />} />
         <Route path="/BeatCard" element={<BeatCard />} />
@@ -132,12 +144,10 @@ export default function App() {
           path="/ProducerRegistration"
           element={<ProducerRegistration />}
         />
-
         <Route path="/Login" element={<Login />} />
         <Route path="/ClientLogin" element={<ClientLogin />} />
-
         <Route path="/Register" element={<Register />} />
-        {/* Private Routes */}
+
         <Route element={<PrivateRoute />}>
           <Route path="/ClientHomepage" element={<ClientHomepage />} />
           <Route path="/ProducerHomePage" element={<ProducerHomePage />} />
