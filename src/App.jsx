@@ -1,17 +1,18 @@
+// src/App.jsx
 import React, { useState, useContext } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Link, useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
+// Import your components and pages
 import { ClientHomepage } from "./components/UserAuth/ClientHomepage";
 import { ProducerHomePage } from "./components/UserAuth/ProducerHomePage";
 import Register from "./components/UserAuth/Register";
 import { Login } from "./components/UserAuth/Login";
 import ClientLogin from "./components/UserAuth/ClientLogin";
 import PrivateRoute from "./utils/PrivateRoute";
-import { AuthProvider } from "../src/context/AuthContext";
-import AuthContext from "../src/context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
+import AuthContext from "./context/AuthContext";
 import { LandingPage } from "./components/LandingPage/LandingPage";
 import { BeatCard } from "./components/BeatCard/BeatCard";
 import { BeatDetails } from "./components/BeatDetails/BeatDetails";
@@ -23,7 +24,8 @@ import { fetchSearchResults } from "./store/SearchSlice";
 import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
 import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
 
-export default function App() {
+function AppContent() {
+  // Since AppContent is rendered inside AuthProvider, we can safely use the context.
   const { user, logoutUser } = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const searchResults = useSelector((state) => state.search.results);
@@ -55,7 +57,7 @@ export default function App() {
   };
 
   return (
-    <AuthProvider>
+    <>
       <nav className="bg-white border-gray-200 dark:bg-gray-900">
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <Link to="/" className="flex items-center">
@@ -153,6 +155,14 @@ export default function App() {
           <Route path="/ProducerHomePage" element={<ProducerHomePage />} />
         </Route>
       </Routes>
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
     </AuthProvider>
   );
 }

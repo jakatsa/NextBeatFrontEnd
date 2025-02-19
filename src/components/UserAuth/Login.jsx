@@ -4,19 +4,15 @@ import AuthContext from "../../context/AuthContext";
 
 export const Login = () => {
   const { loginUser } = useContext(AuthContext);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
-    const password = e.target.password.value;
-
-    email.length > 0 && loginUser(email, password);
-    console.log(email);
-    console.log(password);
+    if (email.trim() && password.trim()) {
+      loginUser(email, password);
+    }
   };
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-4">
