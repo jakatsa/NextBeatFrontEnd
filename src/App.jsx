@@ -23,6 +23,7 @@ import CategoryPage from "./components/CategoryPage/CategoryPage";
 import { fetchSearchResults } from "./store/SearchSlice";
 import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
 import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
+import RoleBasedRoute from "./utils/RoleBasedRoute";
 
 function AppContent() {
   // Since AppContent is rendered inside AuthProvider, we can safely use the context.
@@ -151,8 +152,22 @@ function AppContent() {
         <Route path="/Register" element={<Register />} />
 
         <Route element={<PrivateRoute />}>
-          <Route path="/ClientHomepage" element={<ClientHomepage />} />
-          <Route path="/ProducerHomePage" element={<ProducerHomePage />} />
+          <Route
+            path="/ClientHomepage"
+            element={
+              <RoleBasedRoute allowedRoles={["client"]}>
+                <ClientHomepage />
+              </RoleBasedRoute>
+            }
+          />
+          <Route
+            path="/ProducerHomePage"
+            element={
+              <RoleBasedRoute allowedRoles={["producer"]}>
+                <ProducerHomePage />
+              </RoleBasedRoute>
+            }
+          />
         </Route>
       </Routes>
     </>

@@ -1,3 +1,4 @@
+// src/store/BeatSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 const initialState = {
@@ -6,17 +7,15 @@ const initialState = {
   error: null,
 };
 
-// Async thunk to post a new beat with token
 export const addBeat = createAsyncThunk(
   "beat/add",
-  async ({ formData, token }, { rejectWithValue }) => {
+  async (formData, { rejectWithValue }) => {
     try {
-      const response = await fetch("http://127.0.0.1:8000/beats/api/beat/", {
+      const response = await fetch("http://localhost:8000/beats/api/beat/", {
         method: "POST",
         body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`, // Add the token in the request
-        },
+        credentials: "include", // Ensures cookies are sent automatically
+        // Do NOT set a manual Content-Type header when sending FormData!
       });
 
       if (!response.ok) {
@@ -46,9 +45,7 @@ export const getBeatById = createAsyncThunk("beat/getById", async (id) => {
 const beatSlice = createSlice({
   name: "beat",
   initialState,
-
   reducers: {},
-
   extraReducers: (builder) => {
     builder
       .addCase(getBeats.pending, (state) => {
