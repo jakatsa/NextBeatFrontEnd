@@ -5,7 +5,6 @@ import { CategoryList } from "../CategoryList/CategoryList";
 export const LandingPage = () => {
   return (
     <div>
-      LandingPage
       <CategoryList />
       <AllBeatsPage />
     </div>

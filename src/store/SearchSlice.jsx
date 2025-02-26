@@ -7,7 +7,7 @@ export const fetchSearchResults = createAsyncThunk(
       // Build the query string based on the queryParams object
       const queryString = new URLSearchParams(queryParams).toString();
       const response = await fetch(
-        `http://127.0.0.1:8000/beats/api/beat/?${queryString}`
+        `https://nextbeatbackend.onrender.com/beats/api/beat/?${queryString}`
       );
 
       if (!response.ok) {

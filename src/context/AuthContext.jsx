@@ -14,10 +14,13 @@ export const AuthProvider = ({ children }) => {
   // Fetch the current user details from the backend.
   const getUserData = async () => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/me/", {
-        method: "GET",
-        credentials: "include", // Sends the HttpOnly cookie with the request
-      });
+      const response = await fetch(
+        "https://nextbeatbackend.onrender.com/api/v1/me/",
+        {
+          method: "GET",
+          credentials: "include", // Sends the HttpOnly cookie with the request
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         setUser(data);
@@ -43,14 +46,17 @@ export const AuthProvider = ({ children }) => {
   // Login function: calls the login endpoint, then fetches user details.
   const loginUser = async (email, password) => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/token/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", // Important: sends cookies with the request
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await fetch(
+        "https://nextbeatbackend.onrender.com/api/v1/token/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include", // Important: sends cookies with the request
+          body: JSON.stringify({ email, password }),
+        }
+      );
       if (response.ok) {
         // After a successful login, the backend sets an HttpOnly cookie.
         // Now fetch the user details.
@@ -74,9 +80,9 @@ export const AuthProvider = ({ children }) => {
         });
 
         // Optionally, force a page reload to update the UI.
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        // setTimeout(() => {
+        //   window.location.reload();
+        // }, 500);
       } else {
         const data = await response.json();
         throw new Error(data.detail || "Login failed");
@@ -100,7 +106,7 @@ export const AuthProvider = ({ children }) => {
   const logoutUser = useCallback(async () => {
     try {
       // Call your logout endpoint (ensure domain consistency)
-      await fetch("http://localhost:8000/api/v1/logout/", {
+      await fetch("https://nextbeatbackend.onrender.com/api/v1/logout/", {
         method: "POST",
         credentials: "include",
       });
@@ -160,13 +166,16 @@ export const AuthProvider = ({ children }) => {
         };
       }
 
-      const response = await fetch("http://localhost:8000/api/v1/register/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response = await fetch(
+        "https://nextbeatbackend.onrender.com/api/v1/register/",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        }
+      );
       if (response.ok) {
         Swal.fire({
           title: "Registration Successful",

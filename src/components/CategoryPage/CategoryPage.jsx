@@ -13,7 +13,7 @@ const CategoryPage = () => {
     const fetchCategoryData = async () => {
       try {
         const categoryResponse = await axios.get(
-          `http://127.0.0.1:8000/beats/api/categories/`
+          `https://nextbeatbackend.onrender.com/beats/api/categories/`
         );
         const currentCategory = categoryResponse.data.find(
           (c) => c.slug === slug
@@ -22,7 +22,7 @@ const CategoryPage = () => {
 
         if (currentCategory) {
           const beatsResponse = await axios.get(
-            `http://127.0.0.1:8000/beats/api/beat/`
+            `https://nextbeatbackend.onrender.com/beats/api/beat/`
           );
           const filteredBeats = beatsResponse.data.filter((beat) =>
             beat.categories.includes(currentCategory.id)
