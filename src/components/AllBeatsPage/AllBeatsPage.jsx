@@ -5,6 +5,8 @@ import { getBeats } from "../../store/BeatSlice";
 import { Link } from "react-router-dom";
 import { PlayCircle, PauseCircle } from "lucide-react";
 
+const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
+
 export const AllBeatsPage = () => {
   const dispatch = useDispatch();
   const { data: beats } = useSelector((state) => state.beat);
@@ -53,11 +55,18 @@ export const AllBeatsPage = () => {
 
     if (audioElement.paused) {
       console.log("Playing audio element with id:", id);
-      audioElement.play();
-      currentAudio.current = audioElement;
-      setActiveBeat(id);
-      setIsPlaying(true);
-      setShowPlayer(true);
+      audioElement
+        .play()
+        .then(() => {
+          console.log("Audio play promise resolved");
+          currentAudio.current = audioElement;
+          setActiveBeat(id);
+          setIsPlaying(true);
+          setShowPlayer(true);
+        })
+        .catch((error) => {
+          console.error("Error playing audio: ", error);
+        });
     } else {
       console.log("Pausing audio element with id:", id);
       audioElement.pause();
@@ -102,14 +111,8 @@ export const AllBeatsPage = () => {
         readyState: currentAudio.current.readyState,
       });
 
-      // Attempt to set the new currentTime
       currentAudio.current.currentTime = newTime;
-      console.log(
-        "Immediately after assignment, currentTime:",
-        currentAudio.current.currentTime
-      );
 
-      // Listen for the "seeked" event
       const onSeeked = () => {
         console.log(
           "Audio seeked event fired, currentTime:",
@@ -124,7 +127,6 @@ export const AllBeatsPage = () => {
       };
       currentAudio.current.addEventListener("seeked", onSeeked);
 
-      // Also check after a short delay
       setTimeout(() => {
         console.log(
           "After timeout, currentTime:",
@@ -164,7 +166,11 @@ export const AllBeatsPage = () => {
             onMouseLeave={() => setHoveredBeat(null)}
           >
             <div className="relative">
-              <img src={beat.image} alt={beat.title} className="w-full" />
+              <img
+                src={`${CLOUDINARY_BASE}${beat.image}`}
+                alt={beat.title}
+                className="w-full"
+              />
               {hoveredBeat === beat.id && (
                 <button
                   onClick={() => handlePlayPause(beat.id)}
@@ -189,15 +195,18 @@ export const AllBeatsPage = () => {
             <p className="text-gray-500 text-sm">
               Created on: {new Date(beat.created_at).toLocaleDateString()}
             </p>
+            {/* Audio element */}
             <audio
               id={`audio-${beat.id}`}
               preload="auto"
-              // Instead of using a "hidden" class, you could use CSS to position offscreen
-              style={{ position: "absolute", left: "-9999px" }}
+              crossOrigin="anonymous"
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
             >
-              <source src={beat.audio_file} type="audio/mpeg" />
+              <source
+                src={`${CLOUDINARY_BASE}${beat.audio_file}`}
+                type="audio/mpeg"
+              />
               Your browser does not support the audio tag.
             </audio>
             <Link to={`/beat/${beat.id}`}>
