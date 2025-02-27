@@ -1,4 +1,3 @@
-// src/components/BeatCard/AddBeat.jsx
 import { useState } from "react";
 import { addBeat } from "../../store/BeatSlice";
 import { useDispatch } from "react-redux";
@@ -10,6 +9,7 @@ export const AddBeat = () => {
     image: null,
     genre: "",
     price: "",
+    producer: 2, // Default producer ID (Replace with dynamic value if needed)
   });
 
   const dispatch = useDispatch();
@@ -30,6 +30,7 @@ export const AddBeat = () => {
     form.append("image", formData.image);
     form.append("genre", formData.genre);
     form.append("price", formData.price);
+    form.append("producer", formData.producer); // ✅ Add producer
 
     // Debug: Log all FormData entries
     for (let [key, value] of form.entries()) {
@@ -45,8 +46,10 @@ export const AddBeat = () => {
         image: null,
         genre: "",
         price: "",
+        producer: 2, // Reset producer if needed
       });
     } catch (error) {
+      console.error("Failed to add beat:", error);
       alert("Failed to add beat: " + error);
     }
   };
