@@ -1,32 +1,50 @@
 // src/App.jsx
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, Suspense, lazy } from "react";
 import { Link, useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-// Import your components and pages
-import { ClientHomepage } from "./components/UserAuth/ClientHomepage";
-import { ProducerHomePage } from "./components/UserAuth/ProducerHomePage";
-import Register from "./components/UserAuth/Register";
-import { Login } from "./components/UserAuth/Login";
-import ClientLogin from "./components/UserAuth/ClientLogin";
-import PrivateRoute from "./utils/PrivateRoute";
+// Instead of importing components directly, load them lazily
+const ClientHomepage = lazy(() =>
+  import("./components/UserAuth/ClientHomepage").then((module) => ({
+    default: module.ClientHomepage,
+  }))
+);
+const ProducerHomePage = lazy(() =>
+  import("./components/UserAuth/ProducerHomePage").then((module) => ({
+    default: module.ProducerHomePage,
+  }))
+);
+const Register = lazy(() => import("./components/UserAuth/Register"));
+const Login = lazy(() => import("./components/UserAuth/Login"));
+const ClientLogin = lazy(() => import("./components/UserAuth/ClientLogin"));
+const PrivateRoute = lazy(() => import("./utils/PrivateRoute"));
+const RoleBasedRoute = lazy(() => import("./utils/RoleBasedRoute"));
+const LandingPage = lazy(() => import("./components/LandingPage/LandingPage"));
+const BeatCard = lazy(() => import("./components/BeatCard/BeatCard"));
+const BeatDetails = lazy(() => import("./components/BeatDetails/BeatDetails"));
+const Cart = lazy(() => import("./components/Cart/Cart"));
+const CategoryList = lazy(() =>
+  import("./components/CategoryList/CategoryList")
+);
+const SearchResults = lazy(() =>
+  import("./components/SearchResults/SearchResults")
+);
+const CategoryPage = lazy(() =>
+  import("./components/CategoryPage/CategoryPage")
+);
+const ClientRegistration = lazy(() =>
+  import("./components/UserAuth/ClientRegistration")
+);
+const ProducerRegistration = lazy(() =>
+  import("./components/UserAuth/ProducerRegistration")
+);
+
+import { fetchSearchResults } from "./store/SearchSlice";
 import { AuthProvider } from "./context/AuthContext";
 import AuthContext from "./context/AuthContext";
-import { LandingPage } from "./components/LandingPage/LandingPage";
-import { BeatCard } from "./components/BeatCard/BeatCard";
-import { BeatDetails } from "./components/BeatDetails/BeatDetails";
-import { Cart } from "./components/Cart/Cart";
-import { CategoryList } from "./components/CategoryList/CategoryList";
-import { SearchResults } from "./components/SearchResults/SearchResults";
-import CategoryPage from "./components/CategoryPage/CategoryPage";
-import { fetchSearchResults } from "./store/SearchSlice";
-import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
-import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
-import RoleBasedRoute from "./utils/RoleBasedRoute";
 
 function AppContent() {
-  // Since AppContent is rendered inside AuthProvider, we can safely use the context.
   const { user, logoutUser } = useContext(AuthContext);
   const [query, setQuery] = useState("");
   const searchResults = useSelector((state) => state.search.results);
@@ -133,43 +151,46 @@ function AppContent() {
         </div>
       </nav>
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/LandingPage" />} />
-        <Route path="/LandingPage" element={<LandingPage />} />
-        <Route path="/BeatCard" element={<BeatCard />} />
-        <Route path="/Cart" element={<Cart />} />
-        <Route path="/Search" element={<SearchResults query={query} />} />
-        <Route path="/" element={<CategoryList />} />
-        <Route path="/categories/:slug" element={<CategoryPage />} />
-        <Route path="/beat/:id" element={<BeatDetails />} />
-        <Route path="/ClientRegistration" element={<ClientRegistration />} />
-        <Route
-          path="/ProducerRegistration"
-          element={<ProducerRegistration />}
-        />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/ClientLogin" element={<ClientLogin />} />
-        <Route path="/Register" element={<Register />} />
+      {/* Wrap your Routes in Suspense to handle lazy loading */}
+      <Suspense fallback={<div>Loading...</div>}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/LandingPage" />} />
+          <Route path="/LandingPage" element={<LandingPage />} />
+          <Route path="/BeatCard" element={<BeatCard />} />
+          <Route path="/Cart" element={<Cart />} />
+          <Route path="/Search" element={<SearchResults query={query} />} />
+          <Route path="/" element={<CategoryList />} />
+          <Route path="/categories/:slug" element={<CategoryPage />} />
+          <Route path="/beat/:id" element={<BeatDetails />} />
+          <Route path="/ClientRegistration" element={<ClientRegistration />} />
+          <Route
+            path="/ProducerRegistration"
+            element={<ProducerRegistration />}
+          />
+          <Route path="/Login" element={<Login />} />
+          <Route path="/ClientLogin" element={<ClientLogin />} />
+          <Route path="/Register" element={<Register />} />
 
-        <Route element={<PrivateRoute />}>
-          <Route
-            path="/ClientHomepage"
-            element={
-              <RoleBasedRoute allowedRoles={["client"]}>
-                <ClientHomepage />
-              </RoleBasedRoute>
-            }
-          />
-          <Route
-            path="/ProducerHomePage"
-            element={
-              <RoleBasedRoute allowedRoles={["producer"]}>
-                <ProducerHomePage />
-              </RoleBasedRoute>
-            }
-          />
-        </Route>
-      </Routes>
+          <Route element={<PrivateRoute />}>
+            <Route
+              path="/ClientHomepage"
+              element={
+                <RoleBasedRoute allowedRoles={["client"]}>
+                  <ClientHomepage />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/ProducerHomePage"
+              element={
+                <RoleBasedRoute allowedRoles={["producer"]}>
+                  <ProducerHomePage />
+                </RoleBasedRoute>
+              }
+            />
+          </Route>
+        </Routes>
+      </Suspense>
     </>
   );
 }
