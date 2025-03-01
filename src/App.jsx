@@ -40,8 +40,12 @@ const ProducerRegistration = lazy(() =>
   import("./components/UserAuth/ProducerRegistration")
 );
 // Lazy load the AllBeats component (assumed to fetch beats and images)
-const AllBeats = lazy(() => import("./components/AllBeats/AllBeats"));
 
+const AllBeats = lazy(() =>
+  import("./components/AllBeats/AllBeats").then((module) => ({
+    default: module.AllBeats,
+  }))
+);
 import { fetchSearchResults } from "./store/SearchSlice";
 import { AuthProvider } from "./context/AuthContext";
 import AuthContext from "./context/AuthContext";
