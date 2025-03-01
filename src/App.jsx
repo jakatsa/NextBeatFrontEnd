@@ -4,7 +4,7 @@ import { Link, useNavigate, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-// Instead of importing components directly, load them lazily
+// Lazy load your components
 const ClientHomepage = lazy(() =>
   import("./components/UserAuth/ClientHomepage").then((module) => ({
     default: module.ClientHomepage,
@@ -39,6 +39,8 @@ const ClientRegistration = lazy(() =>
 const ProducerRegistration = lazy(() =>
   import("./components/UserAuth/ProducerRegistration")
 );
+// Lazy load the AllBeats component (assumed to fetch beats and images)
+const AllBeats = lazy(() => import("./components/AllBeats/AllBeats"));
 
 import { fetchSearchResults } from "./store/SearchSlice";
 import { AuthProvider } from "./context/AuthContext";
@@ -159,6 +161,7 @@ function AppContent() {
           <Route path="/BeatCard" element={<BeatCard />} />
           <Route path="/Cart" element={<Cart />} />
           <Route path="/Search" element={<SearchResults query={query} />} />
+          <Route path="/AllBeats" element={<AllBeats />} />
           <Route path="/" element={<CategoryList />} />
           <Route path="/categories/:slug" element={<CategoryPage />} />
           <Route path="/beat/:id" element={<BeatDetails />} />
