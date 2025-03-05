@@ -1,8 +1,17 @@
 import React, { Suspense } from "react";
 
-// Lazy load the components
-const CategoryList = React.lazy(() => import("../CategoryList/CategoryList"));
-const AllBeatsPage = React.lazy(() => import("../AllBeatsPage/AllBeatsPage"));
+// Lazy load the components with named export handling
+const CategoryList = React.lazy(() =>
+  import("../CategoryList/CategoryList").then((module) => ({
+    default: module.CategoryList,
+  }))
+);
+
+const AllBeatsPage = React.lazy(() =>
+  import("../AllBeatsPage/AllBeatsPage").then((module) => ({
+    default: module.AllBeatsPage,
+  }))
+);
 
 export const LandingPage = () => {
   return (
