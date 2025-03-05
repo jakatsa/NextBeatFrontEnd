@@ -5,6 +5,8 @@ import { getBeats } from "../../store/BeatSlice";
 import { Link } from "react-router-dom";
 import { PlayCircle, PauseCircle } from "lucide-react";
 
+console.log("all beats loaded");
+
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
 
 export const AllBeatsPage = () => {
