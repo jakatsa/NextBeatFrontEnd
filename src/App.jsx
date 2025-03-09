@@ -1,6 +1,13 @@
 // src/App.jsx
 import React, { useState, useContext } from "react";
-import { Link, useNavigate, Routes, Route, Navigate } from "react-router-dom";
+import {
+  NavLink,
+  Link,
+  useNavigate,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
@@ -24,14 +31,21 @@ import { fetchSearchResults } from "./store/SearchSlice";
 import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
 import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
 import RoleBasedRoute from "./utils/RoleBasedRoute";
+import Trial from "./components/Pages/Trial";
+import Layout from "./components/Layout";
+import { AiOutlineMenu, AiOutlineSearch } from "react-icons/ai";
 
 function AppContent() {
-  // Since AppContent is rendered inside AuthProvider, we can safely use the context.
   const { user, logoutUser } = useContext(AuthContext);
   const [query, setQuery] = useState("");
+  const [isMenu, setIsMenu] = useState(false);
   const searchResults = useSelector((state) => state.search.results);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  // Determine the home route based on user role.
+  const homeRoute =
+    user && user.role === "producer" ? "/ProducerHomePage" : "/LandingPage";
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -59,58 +73,91 @@ function AppContent() {
 
   return (
     <>
-      <nav className="bg-white border-gray-200 dark:bg-gray-900">
-        <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-          <Link to="/" className="flex items-center">
-            <img
-              src="https://flowbite.com/docs/images/logo.svg"
-              className="h-8 mr-3"
-              alt="BeatRoot Logo"
-            />
-            <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              BeatRoot
-            </span>
-          </Link>
-
-          <div className="flex md:order-2">
-            <form onSubmit={handleSearch} className="relative hidden md:block">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search..."
-                className="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+      {/* Navbar */}
+      <header className="fixed top-0 left-0 z-50 w-screen h-[12vh] bg-white md:shadow-md shadow-sm">
+        {/* Desktop and tablet */}
+        <div className="hidden md:flex justify-between items-center px-7 p-2 h-full">
+          {/* Logo and Home */}
+          <div className="logo flex items-center">
+            <NavLink to={homeRoute} className="flex items-center">
+              <img
+                src="https://flowbite.com/docs/images/logo.svg"
+                alt="BeatRoot Logo"
+                width="40px"
+                height="40px"
               />
-            </form>
+              <span className="text-2xl font-semibold ml-3">BeatRoot</span>
+            </NavLink>
           </div>
 
-          <ul className="flex flex-col p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+          {/* Navlinks */}
+          <ul className="flex items-center space-x-8">
             <li>
-              <Link to="/" className="block py-2 pl-3 pr-4 text-blue-700">
+              <NavLink
+                to={homeRoute}
+                className={({ isActive }) =>
+                  isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                }
+              >
                 Home
-              </Link>
+              </NavLink>
             </li>
-            <li>
-              <Link to="/Cart" className="block py-2 pl-3 pr-4 text-gray-900">
-                Cart: {searchResults?.length || 0}
-              </Link>
-            </li>
-            <li>
-              <Link to="/ProducerRegistration" className="block py-2 pl-3 pr-4">
-                Sell Beats?
-              </Link>
-            </li>
-            <li>
-              <Link to="/ClientRegistration" className="block py-2 pl-3 pr-4">
-                Buy Beats?
-              </Link>
-            </li>
+
+            {/* For producers: show "Buy Beats?" */}
+            {user && user.role === "producer" && (
+              <li>
+                <NavLink
+                  to="/ClientRegistration"
+                  className={({ isActive }) =>
+                    isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                  }
+                >
+                  Buy Beats?
+                </NavLink>
+              </li>
+            )}
+
+            {/* For clients: show Cart, Sell Beats?, and Producers */}
+            {user && user.role === "client" && (
+              <>
+                <li>
+                  <NavLink
+                    to="/Cart"
+                    className={({ isActive }) =>
+                      isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                    }
+                  >
+                    Cart: {searchResults?.length || 0}
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/ProducerRegistration"
+                    className={({ isActive }) =>
+                      isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                    }
+                  >
+                    Sell Beats?
+                  </NavLink>
+                </li>
+                <li>
+                  <NavLink
+                    to="/Producers"
+                    className={({ isActive }) =>
+                      isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                    }
+                  >
+                    Producers
+                  </NavLink>
+                </li>
+              </>
+            )}
 
             {user ? (
               <li>
                 <button
                   onClick={handleLogout}
-                  className="block py-2 px-4 text-white bg-red-500 rounded"
+                  className="bg-red-500 px-6 py-1.5 text-white rounded-full"
                 >
                   Logout
                 </button>
@@ -118,58 +165,226 @@ function AppContent() {
             ) : (
               <>
                 <li>
-                  <Link to="/Login" className="block py-2 pl-3 pr-4">
+                  <NavLink
+                    to="/Login"
+                    className={({ isActive }) =>
+                      isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                    }
+                  >
                     Login
-                  </Link>
+                  </NavLink>
                 </li>
                 <li>
-                  <Link to="/Register" className="block py-2 pl-3 pr-4">
+                  <NavLink
+                    to="/Register"
+                    className={({ isActive }) =>
+                      isActive ? "py-2 text-blue-500" : "py-2 text-gray-900"
+                    }
+                  >
                     Register
-                  </Link>
+                  </NavLink>
                 </li>
               </>
             )}
           </ul>
+
+          {/* Search */}
+          <div className="flex items-center">
+            <form onSubmit={handleSearch} className="relative">
+              <AiOutlineSearch
+                size={22}
+                className="absolute top-2 left-3 text-gray-500"
+              />
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search..."
+                className="block w-full p-2 pl-10 text-sm border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </form>
+          </div>
         </div>
-      </nav>
 
-      <Routes>
-        <Route path="/" element={<Navigate to="/LandingPage" />} />
-        <Route path="/LandingPage" element={<LandingPage />} />
-        <Route path="/BeatCard" element={<BeatCard />} />
-        <Route path="/Cart" element={<Cart />} />
-        <Route path="/Search" element={<SearchResults query={query} />} />
-        <Route path="/" element={<CategoryList />} />
-        <Route path="/categories/:slug" element={<CategoryPage />} />
-        <Route path="/beat/:id" element={<BeatDetails />} />
-        <Route path="/ClientRegistration" element={<ClientRegistration />} />
-        <Route
-          path="/ProducerRegistration"
-          element={<ProducerRegistration />}
-        />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/ClientLogin" element={<ClientLogin />} />
-        <Route path="/Register" element={<Register />} />
+        {/* Mobile */}
+        <div className="flex items-center justify-between md:hidden h-full pl-2 pr-8">
+          {/* Logo and Home */}
+          <NavLink to={homeRoute} className="flex items-center gap-2">
+            <img
+              src="https://flowbite.com/docs/images/logo.svg"
+              alt="BeatRoot Logo"
+              width="40px"
+              height="40px"
+            />
+            <span className="text-2xl font-semibold">BeatRoot</span>
+          </NavLink>
 
-        <Route element={<PrivateRoute />}>
+          {/* Mobile Menu Toggle */}
+          <div className="relative">
+            <AiOutlineMenu
+              size={20}
+              onClick={() => setIsMenu(!isMenu)}
+              className="cursor-pointer"
+            />
+            {isMenu && (
+              <div className="bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-16 left-0 w-full">
+                <ul className="flex flex-col">
+                  <li className="mx-5 py-2">
+                    <NavLink
+                      to={homeRoute}
+                      onClick={() => setIsMenu(false)}
+                      className={({ isActive }) =>
+                        isActive ? "text-blue-500" : "text-gray-900"
+                      }
+                    >
+                      Home
+                    </NavLink>
+                  </li>
+
+                  {user && user.role === "producer" && (
+                    <li className="mx-5 py-2">
+                      <NavLink
+                        to="/ClientRegistration"
+                        onClick={() => setIsMenu(false)}
+                        className={({ isActive }) =>
+                          isActive ? "text-blue-500" : "text-gray-900"
+                        }
+                      >
+                        Buy Beats?
+                      </NavLink>
+                    </li>
+                  )}
+
+                  {user && user.role === "client" && (
+                    <>
+                      <li className="mx-5 py-2">
+                        <NavLink
+                          to="/Cart"
+                          onClick={() => setIsMenu(false)}
+                          className={({ isActive }) =>
+                            isActive ? "text-blue-500" : "text-gray-900"
+                          }
+                        >
+                          Cart: {searchResults?.length || 0}
+                        </NavLink>
+                      </li>
+                      <li className="mx-5 py-2">
+                        <NavLink
+                          to="/ProducerRegistration"
+                          onClick={() => setIsMenu(false)}
+                          className={({ isActive }) =>
+                            isActive ? "text-blue-500" : "text-gray-900"
+                          }
+                        >
+                          Sell Beats?
+                        </NavLink>
+                      </li>
+                      <li className="mx-5 py-2">
+                        <NavLink
+                          to="/Producers"
+                          onClick={() => setIsMenu(false)}
+                          className={({ isActive }) =>
+                            isActive ? "text-blue-500" : "text-gray-900"
+                          }
+                        >
+                          Producers
+                        </NavLink>
+                      </li>
+                    </>
+                  )}
+
+                  <li className="mx-5 py-2">
+                    {user ? (
+                      <button
+                        onClick={() => {
+                          setIsMenu(false);
+                          handleLogout();
+                        }}
+                        className="bg-red-500 px-6 py-1.5 text-white rounded-full"
+                      >
+                        Logout
+                      </button>
+                    ) : (
+                      <>
+                        <NavLink
+                          to="/Login"
+                          onClick={() => setIsMenu(false)}
+                          className={({ isActive }) =>
+                            isActive ? "text-blue-500" : "text-gray-900"
+                          }
+                        >
+                          Login
+                        </NavLink>
+                        <NavLink
+                          to="/Register"
+                          onClick={() => setIsMenu(false)}
+                          className={({ isActive }) =>
+                            isActive ? "text-blue-500" : "text-gray-900"
+                          }
+                        >
+                          Register
+                        </NavLink>
+                      </>
+                    )}
+                  </li>
+                </ul>
+              </div>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Routes */}
+      <div className="pt-[12vh]">
+        <Routes>
+          <Route path="/" element={<Navigate to="/LandingPage" />} />
           <Route
-            path="/ClientHomepage"
+            path="/LandingPage"
             element={
-              <RoleBasedRoute allowedRoles={["client"]}>
-                <ClientHomepage />
-              </RoleBasedRoute>
+              <Layout>
+                <LandingPage />
+              </Layout>
             }
           />
+          <Route path="/BeatCard" element={<BeatCard />} />
+          <Route path="/Cart" element={<Cart />} />
+          <Route path="/Search" element={<SearchResults query={query} />} />
+          <Route path="/" element={<CategoryList />} />
+          <Route path="/categories/:slug" element={<CategoryPage />} />
+          <Route path="/beat/:id" element={<BeatDetails />} />
+          <Route path="/ClientRegistration" element={<ClientRegistration />} />
+          <Route path="/trial" element={<Trial />} />
           <Route
-            path="/ProducerHomePage"
-            element={
-              <RoleBasedRoute allowedRoles={["producer"]}>
-                <ProducerHomePage />
-              </RoleBasedRoute>
-            }
+            path="/ProducerRegistration"
+            element={<ProducerRegistration />}
           />
-        </Route>
-      </Routes>
+          <Route path="/Login" element={<Login />} />
+          <Route path="/ClientLogin" element={<ClientLogin />} />
+          <Route path="/Register" element={<Register />} />
+          <Route path="/LandingPageNavBar" element={<></>} />
+          {/* Route for Producers page */}
+          <Route path="/Producers" element={<div>Producers List</div>} />
+
+          <Route element={<PrivateRoute />}>
+            <Route
+              path="/ClientHomepage"
+              element={
+                <RoleBasedRoute allowedRoles={["client"]}>
+                  <ClientHomepage />
+                </RoleBasedRoute>
+              }
+            />
+            <Route
+              path="/ProducerHomePage"
+              element={
+                <RoleBasedRoute allowedRoles={["producer"]}>
+                  <ProducerHomePage />
+                </RoleBasedRoute>
+              }
+            />
+          </Route>
+        </Routes>
+      </div>
     </>
   );
 }
