@@ -227,7 +227,7 @@ function AppContent() {
               className="cursor-pointer"
             />
             {isMenu && (
-              <div className="bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-16 left-0 w-full">
+              <div className="bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-full inset-x-0">
                 <ul className="flex flex-col">
                   <li className="mx-5 py-2">
                     <NavLink
