@@ -227,9 +227,9 @@ function AppContent() {
               className="cursor-pointer"
             />
             {isMenu && (
-              <div className="bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-full inset-x-0">
-                <ul className="flex flex-col">
-                  <li className="mx-5 py-2">
+              <div className="bg-gray-50 shadow-xl rounded-lg flex flex-col absolute top-full inset-x-0 z-50">
+                <ul className="flex flex-col p-2">
+                  <li className="py-2">
                     <NavLink
                       to={homeRoute}
                       onClick={() => setIsMenu(false)}
@@ -242,7 +242,7 @@ function AppContent() {
                   </li>
 
                   {user && user.role === "producer" && (
-                    <li className="mx-5 py-2">
+                    <li className="py-2">
                       <NavLink
                         to="/ClientRegistration"
                         onClick={() => setIsMenu(false)}
@@ -257,7 +257,7 @@ function AppContent() {
 
                   {user && user.role === "client" && (
                     <>
-                      <li className="mx-5 py-2">
+                      <li className="py-2">
                         <NavLink
                           to="/Cart"
                           onClick={() => setIsMenu(false)}
@@ -268,7 +268,7 @@ function AppContent() {
                           Cart: {searchResults?.length || 0}
                         </NavLink>
                       </li>
-                      <li className="mx-5 py-2">
+                      <li className="py-2">
                         <NavLink
                           to="/ProducerRegistration"
                           onClick={() => setIsMenu(false)}
@@ -279,7 +279,7 @@ function AppContent() {
                           Sell Beats?
                         </NavLink>
                       </li>
-                      <li className="mx-5 py-2">
+                      <li className="py-2">
                         <NavLink
                           to="/Producers"
                           onClick={() => setIsMenu(false)}
@@ -293,7 +293,7 @@ function AppContent() {
                     </>
                   )}
 
-                  <li className="mx-5 py-2">
+                  <li className="py-2">
                     {user ? (
                       <button
                         onClick={() => {
@@ -361,7 +361,7 @@ function AppContent() {
           <Route path="/Login" element={<Login />} />
           <Route path="/ClientLogin" element={<ClientLogin />} />
           <Route path="/Register" element={<Register />} />
-          <Route path="/LandingPageNavBar" element={<></>} />
+
           {/* Route for Producers page */}
           <Route path="/Producers" element={<div>Producers List</div>} />
 

@@ -1,4 +1,5 @@
 import React, { Suspense } from "react";
+import { Hero } from "../SharedPages/Hero";
 
 // Lazy load the components with named export handling
 const CategoryList = React.lazy(() =>
@@ -16,6 +17,9 @@ const AllBeatsPage = React.lazy(() =>
 export const LandingPage = () => {
   return (
     <div>
+      <Suspense fallback={<div>Loading Hero Section...</div>}>
+        <Hero />
+      </Suspense>
       <Suspense fallback={<div>Loading Category List...</div>}>
         <CategoryList />
       </Suspense>
