@@ -1,41 +1,30 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addBeat } from "../../store/BeatSlice";
 import { getCategories } from "../../store/CategorySlice";
-import AuthContext from "../../context/AuthContext"; // import your context
 
 export const AddBeat = () => {
   const dispatch = useDispatch();
-  // Get the current user from AuthContext
-  const { user } = useContext(AuthContext);
   const { data: categories, status: catStatus } = useSelector(
     (state) => state.category
   );
 
-  // Initialize formData with producer coming from the auth context if available
+  // Extend your form state to include a category (or categories)
   const [formData, setFormData] = useState({
     title: "",
     audio_file: null,
     image: null,
     genre: "",
     price: "",
-    producer: user?.id || "", // dynamically set from auth context
-    category: "",
+    producer: 2, // Default producer ID (Replace with dynamic value if needed)
+    category: "", // Default category ID (empty until chosen)
   });
 
-  // Update producer if user changes
-  useEffect(() => {
-    if (user) {
-      setFormData((prevData) => ({ ...prevData, producer: user.id }));
-    }
-  }, [user]);
-
-  // Fetch categories on mount
   useEffect(() => {
     dispatch(getCategories());
   }, [dispatch]);
 
-  // Handle input changes, including files and text
+  // Handle input changes including file inputs and the new category select
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prevData) => ({
@@ -52,10 +41,13 @@ export const AddBeat = () => {
     form.append("genre", formData.genre);
     form.append("price", formData.price);
     form.append("producer", formData.producer);
-    // Append categories as a JSON string containing an array of category IDs.
-    form.append("categories", JSON.stringify([formData.category]));
+    // Append the category value under the key "categories" so that DRF
+    // receives a list. Even if it's a single category, we loop over an array.
+    [formData.category].forEach((cat) => {
+      form.append("categories", cat);
+    });
 
-    // Debug: Log FormData entries
+    // Debug: Log all FormData entries
     for (let [key, value] of form.entries()) {
       console.log(`${key}:`, value);
     }
@@ -69,7 +61,7 @@ export const AddBeat = () => {
         image: null,
         genre: "",
         price: "",
-        producer: user?.id || "",
+        producer: 2,
         category: "",
       });
     } catch (error) {

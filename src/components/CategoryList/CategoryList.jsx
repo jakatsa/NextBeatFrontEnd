@@ -1,9 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../store/CategorySlice";
 import { getBeats } from "../../store/BeatSlice";
 import { Link } from "react-router-dom";
 import { PlayCircle, PauseCircle } from "lucide-react";
+import { AiOutlineHeart } from "react-icons/ai";
+import { BsPlayCircle, BsThreeDots } from "react-icons/bs";
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
 
@@ -31,7 +33,7 @@ export const CategoryList = () => {
     dispatch(getBeats());
   }, [dispatch]);
 
-  // Auto-select the trending category (or default to the first category) when categories load
+  // Auto-select trending category or default to first category
   useEffect(() => {
     if (categories.length > 0 && !selectedCategory) {
       const trendingCategory =
@@ -41,17 +43,17 @@ export const CategoryList = () => {
     }
   }, [categories, selectedCategory]);
 
-  // Allow manual selection if needed
+  // Manual category selection if needed
   const handleCategoryClick = (category) => {
     setSelectedCategory(category);
   };
 
-  // Filter beats by selected category (each beat has a "categories" array with category IDs)
+  // Filter beats by selected category (each beat has a "categories" array)
   const filteredBeats = selectedCategory
     ? beats.filter((beat) => beat.categories.includes(selectedCategory.id))
     : [];
 
-  // Audio play/pause functionality (similar to your AllBeatsPage)
+  // Audio play/pause functionality (similar to AllBeatsPage)
   const handlePlayPause = (beatId) => {
     let id = beatId || activeBeat;
     if (!id && currentAudio.current) {
@@ -62,7 +64,6 @@ export const CategoryList = () => {
     const audioElement = document.getElementById(`audio-${id}`);
     if (!audioElement) return;
 
-    // Pause any currently playing audio
     if (currentAudio.current && currentAudio.current !== audioElement) {
       currentAudio.current.pause();
     }
@@ -76,9 +77,7 @@ export const CategoryList = () => {
           setIsPlaying(true);
           setShowPlayer(true);
         })
-        .catch((error) => {
-          console.error("Error playing audio: ", error);
-        });
+        .catch((error) => console.error("Error playing audio: ", error));
     } else {
       audioElement.pause();
       setIsPlaying(false);
@@ -157,41 +156,47 @@ export const CategoryList = () => {
           {filteredBeats.map((beat) => (
             <div
               key={beat.id}
-              className="bg-white shadow-md rounded-lg overflow-hidden p-4 relative"
+              className="bg-white shadow-md rounded-lg overflow-hidden relative"
               onMouseEnter={() => setHoveredBeat(beat.id)}
               onMouseLeave={() => setHoveredBeat(null)}
             >
-              <div className="relative">
+              {/* Image container styled like Card_lg */}
+              <div className="img relative h-72">
                 <img
                   src={`${CLOUDINARY_BASE}${beat.image}`}
                   alt={beat.title}
-                  className="w-full"
+                  className="w-full h-full object-cover rounded-md"
                 />
+                {/* Centered overlay with play icon */}
                 {hoveredBeat === beat.id && (
-                  <button
-                    onClick={() => handlePlayPause(beat.id)}
-                    className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 text-white"
-                  >
-                    {activeBeat === beat.id && isPlaying ? (
-                      <PauseCircle size={50} />
-                    ) : (
-                      <PlayCircle size={50} />
-                    )}
-                  </button>
+                  <div className="overlay icon absolute top-1/2 left-[40%] text-white transform -translate-x-1/2 -translate-y-1/2">
+                    <button onClick={() => handlePlayPause(beat.id)}>
+                      {activeBeat === beat.id && isPlaying ? (
+                        <PauseCircle size={45} />
+                      ) : (
+                        <BsPlayCircle size={45} />
+                      )}
+                    </button>
+                  </div>
                 )}
+                {/* Bottom-right icons overlay */}
+                <div className="overlay absolute bottom-0 right-0 text-white">
+                  <div className="flex p-3">
+                    <AiOutlineHeart size={22} className="mx-3" />
+                    <BsThreeDots size={22} />
+                  </div>
+                </div>
               </div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                {beat.title}
-              </h2>
-              <h3 className="text-lg text-gray-700">
-                by {beat.producer} producer
-              </h3>
-              <p className="text-gray-600 mt-2">Genre: {beat.genre}</p>
-              <p className="text-gray-600">Price: Ksh. {beat.price}</p>
-              <p className="text-gray-500 text-sm">
-                Created on: {new Date(beat.created_at).toLocaleDateString()}
-              </p>
-              {/* Audio element */}
+              {/* Text content below image */}
+              <div className="text p-4">
+                <h3 className="text-md text-gray-500 font-semibold">
+                  {beat.title}
+                </h3>
+                <span className="text-gray-400">
+                  by {beat.producer} producer
+                </span>
+              </div>
+              {/* Audio element (hidden) */}
               <audio
                 id={`audio-${beat.id}`}
                 preload="auto"

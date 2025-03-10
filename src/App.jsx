@@ -32,7 +32,7 @@ import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
 import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
 import RoleBasedRoute from "./utils/RoleBasedRoute";
 import Trial from "./components/Pages/Trial";
-import Layout from "./components/Layout";
+import Layout from "./components/styles/Layout";
 import { AiOutlineMenu, AiOutlineSearch } from "react-icons/ai";
 
 function AppContent() {
