@@ -17,12 +17,13 @@ const AllBeatsPage = React.lazy(() =>
 export const LandingPage = () => {
   return (
     <div>
-      <Suspense fallback={<div>Loading Hero Section...</div>}>
-        <Hero />
-      </Suspense>
+      {/* Hero is a regular import, so no need for Suspense */}
+      <Hero />
+
       <Suspense fallback={<div>Loading Category List...</div>}>
         <CategoryList />
       </Suspense>
+
       <Suspense fallback={<div>Loading Beats...</div>}>
         <AllBeatsPage />
       </Suspense>
