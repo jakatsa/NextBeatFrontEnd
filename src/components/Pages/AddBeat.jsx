@@ -1,20 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { addBeat } from "../../store/BeatSlice";
-import { useDispatch } from "react-redux";
+import { getCategories } from "../../store/CategorySlice";
+import AuthContext from "../../context/AuthContext"; // import your context
 
 export const AddBeat = () => {
+  const dispatch = useDispatch();
+  // Get the current user from AuthContext
+  const { user } = useContext(AuthContext);
+  const { data: categories, status: catStatus } = useSelector(
+    (state) => state.category
+  );
+
+  // Initialize formData with producer coming from the auth context if available
   const [formData, setFormData] = useState({
     title: "",
     audio_file: null,
     image: null,
     genre: "",
     price: "",
-    producer: 2, // Default producer ID (Replace with dynamic value if needed)
+    producer: user?.id || "", // dynamically set from auth context
+    category: "",
   });
 
-  const dispatch = useDispatch();
+  // Update producer if user changes
+  useEffect(() => {
+    if (user) {
+      setFormData((prevData) => ({ ...prevData, producer: user.id }));
+    }
+  }, [user]);
 
-  // Handle form input changes
+  // Fetch categories on mount
+  useEffect(() => {
+    dispatch(getCategories());
+  }, [dispatch]);
+
+  // Handle input changes, including files and text
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prevData) => ({
@@ -30,9 +51,11 @@ export const AddBeat = () => {
     form.append("image", formData.image);
     form.append("genre", formData.genre);
     form.append("price", formData.price);
-    form.append("producer", formData.producer); // ✅ Add producer
+    form.append("producer", formData.producer);
+    // Append categories as a JSON string containing an array of category IDs.
+    form.append("categories", JSON.stringify([formData.category]));
 
-    // Debug: Log all FormData entries
+    // Debug: Log FormData entries
     for (let [key, value] of form.entries()) {
       console.log(`${key}:`, value);
     }
@@ -46,7 +69,8 @@ export const AddBeat = () => {
         image: null,
         genre: "",
         price: "",
-        producer: 2, // Reset producer if needed
+        producer: user?.id || "",
+        category: "",
       });
     } catch (error) {
       console.error("Failed to add beat:", error);
@@ -127,6 +151,33 @@ export const AddBeat = () => {
           placeholder="Enter price"
           className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
         />
+      </div>
+
+      {/* Category dropdown */}
+      <div className="mb-4">
+        <label htmlFor="category" className="block text-gray-700 mb-2">
+          Category:
+        </label>
+        {catStatus === "loading" ? (
+          <p>Loading categories...</p>
+        ) : catStatus === "error" ? (
+          <p>Error loading categories.</p>
+        ) : (
+          <select
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring focus:border-blue-300"
+          >
+            <option value="">Select a category</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        )}
       </div>
 
       <button
