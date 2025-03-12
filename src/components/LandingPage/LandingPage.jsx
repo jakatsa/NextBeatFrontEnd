@@ -17,7 +17,6 @@ const AllBeatsPage = React.lazy(() =>
 export const LandingPage = () => {
   return (
     <div>
-      {/* Hero is a regular import, so no need for Suspense */}
       <Hero />
 
       <Suspense fallback={<div>Loading Category List...</div>}>
