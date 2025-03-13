@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCategories } from "../../store/CategorySlice";
 import { getBeats } from "../../store/BeatSlice";
+import { add } from "../../store/CartSlice";
 import { Link } from "react-router-dom";
 import { PlayCircle, PauseCircle } from "lucide-react";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -118,6 +119,12 @@ export const CategoryList = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
+  // Added addToCart function
+  const addToCart = (beat) => {
+    console.log("Adding beat to cart:", beat);
+    dispatch(add(beat));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Categories</h1>
@@ -215,6 +222,13 @@ export const CategoryList = () => {
                   View Details
                 </button>
               </Link>
+              {/* Added Cart Button */}
+              <button
+                onClick={() => addToCart(beat)}
+                className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
+              >
+                Add to Cart
+              </button>
             </div>
           ))}
         </div>
