@@ -4,8 +4,9 @@ import { add } from "../../store/CartSlice";
 import { getBeats } from "../../store/BeatSlice";
 import { Link } from "react-router-dom";
 import { PlayCircle, PauseCircle } from "lucide-react";
-import { AiFillPlayCircle, AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHeart } from "react-icons/ai";
 import { BsPlayCircle, BsThreeDots } from "react-icons/bs";
+import { FiShoppingCart } from "react-icons/fi"; // added cart icon
 
 console.log("all beats loaded");
 
@@ -23,6 +24,8 @@ export const AllBeatsPage = () => {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [showPlayer, setShowPlayer] = useState(false);
+  // New state for tracking which beat's dropdown is open
+  const [dropdownBeatId, setDropdownBeatId] = useState(null);
 
   useEffect(() => {
     dispatch(getBeats());
@@ -108,6 +111,11 @@ export const AllBeatsPage = () => {
     dispatch(add(beat));
   };
 
+  // Toggle dropdown for the three-dots icon
+  const toggleDropdown = (beatId) => {
+    setDropdownBeatId((prev) => (prev === beatId ? null : beatId));
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Our Beats</h1>
@@ -119,13 +127,26 @@ export const AllBeatsPage = () => {
             onMouseEnter={() => setHoveredBeat(beat.id)}
             onMouseLeave={() => setHoveredBeat(null)}
           >
-            {/* Image Container with increased height (h-80) */}
-            <div className="relative h-80">
+            {/* Image Container with increased height */}
+            <div className="relative h-96">
               <img
                 src={`${CLOUDINARY_BASE}${beat.image}`}
                 alt={beat.title}
                 className="w-full h-full object-cover rounded-md"
               />
+              {/* Overlay for track details */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+                <h2 className="text-xl font-semibold text-white">
+                  {beat.title}
+                </h2>
+                <h3 className="text-md text-gray-200">
+                  by {beat.producer} producer
+                </h3>
+                <p className="text-sm text-gray-200">Genre: {beat.genre}</p>
+                <p className="text-sm text-gray-200">
+                  Price: Ksh. {beat.price}
+                </p>
+              </div>
               {/* Centered play/pause overlay */}
               {hoveredBeat === beat.id && (
                 <div className="overlay absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-white">
@@ -143,25 +164,33 @@ export const AllBeatsPage = () => {
               )}
               {/* Bottom-right icons overlay */}
               <div className="overlay absolute bottom-0 right-0 text-white">
-                <div className="flex p-3">
-                  <AiOutlineHeart size={22} className="mx-3" />
-                  <BsThreeDots size={22} />
+                <div className="flex p-3 space-x-3">
+                  <AiOutlineHeart size={22} className="cursor-pointer" />
+                  <div className="relative">
+                    <BsThreeDots
+                      size={22}
+                      className="cursor-pointer"
+                      onClick={() => toggleDropdown(beat.id)}
+                    />
+                    {dropdownBeatId === beat.id && (
+                      <div className="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-10">
+                        <Link
+                          to={`/beat/${beat.id}`}
+                          className="block px-4 py-2 hover:bg-gray-200"
+                          onClick={() => setDropdownBeatId(null)}
+                        >
+                          View Details
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                  <FiShoppingCart
+                    size={22}
+                    className="cursor-pointer"
+                    onClick={() => addToCart(beat)}
+                  />
                 </div>
               </div>
-            </div>
-            {/* Card Text */}
-            <div className="p-4">
-              <h2 className="text-xl font-semibold text-gray-800">
-                {beat.title}
-              </h2>
-              <h3 className="text-md text-gray-700">
-                by {beat.producer} producer
-              </h3>
-              <p className="text-gray-600 mt-2">Genre: {beat.genre}</p>
-              <p className="text-gray-600">Price: Ksh. {beat.price}</p>
-              <p className="text-gray-500 text-sm">
-                Created on: {new Date(beat.created_at).toLocaleDateString()}
-              </p>
               {/* Hidden Audio Element */}
               <audio
                 id={`audio-${beat.id}`}
@@ -176,17 +205,6 @@ export const AllBeatsPage = () => {
                 />
                 Your browser does not support the audio tag.
               </audio>
-              <Link to={`/beat/${beat.id}`}>
-                <button className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all">
-                  View Details
-                </button>
-              </Link>
-              <button
-                onClick={() => addToCart(beat)}
-                className="mt-4 w-full py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-all"
-              >
-                Add to Cart
-              </button>
             </div>
           </div>
         ))}

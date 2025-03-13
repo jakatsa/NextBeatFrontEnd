@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBeats } from "../../store/BeatSlice";
-import { AiFillPlayCircle, AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHeart } from "react-icons/ai";
 import { PlayCircle, PauseCircle } from "lucide-react";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { BsPlayCircle, BsThreeDots } from "react-icons/bs";
+import { FiShoppingCart } from "react-icons/fi";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import Slider from "react-slick";
+import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
@@ -17,7 +19,7 @@ function SampleNextArrow(props) {
   return (
     <div
       onClick={onClick}
-      className="absolute top-[50%] left-0 text-white cursor-pointer"
+      className="absolute top-[50%] left-0 text-white cursor-pointer z-20"
     >
       <MdKeyboardArrowLeft size={50} />
     </div>
@@ -29,7 +31,7 @@ function SamplePrevArrow(props) {
   return (
     <div
       onClick={onClick}
-      className="absolute top-[50%] right-0 z-10 text-white cursor-pointer"
+      className="absolute top-[50%] right-0 z-20 text-white cursor-pointer"
     >
       <MdKeyboardArrowRight size={50} />
     </div>
@@ -46,6 +48,9 @@ export const Hero = () => {
   const [progress, setProgress] = useState(0);
   const [showPlayer, setShowPlayer] = useState(false);
   const currentAudio = useRef(null);
+  // For hover and dropdown in hero cards.
+  const [hoveredBeat, setHoveredBeat] = useState(null);
+  const [dropdownBeatId, setDropdownBeatId] = useState(null);
 
   // Fetch beats on mount.
   useEffect(() => {
@@ -114,41 +119,89 @@ export const Hero = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  // Render function for a beat.
-  // The "variant" parameter defines the container classes:
-  // - "slider": for the left slider (using h-[92vh] and sm:mt-16)
-  // - "grid": for the right grid (using full width and height).
+  // Toggle dropdown for three-dots icon.
+  const toggleDropdown = (beatId) => {
+    setDropdownBeatId((prev) => (prev === beatId ? null : beatId));
+  };
+
+  // Render function for a beat card in the hero section.
+  // The "variant" parameter defines layout: "slider" for the left slider, "grid" for the right grid.
   const renderBeat = (beat, variant = "slider") => {
     const containerClasses =
       variant === "slider"
         ? "box relative h-[92vh] sm:mt-16 w-full"
         : "box relative w-full h-full";
     return (
-      <div key={beat.id} className={containerClasses}>
+      <div
+        key={beat.id}
+        className={containerClasses}
+        onMouseEnter={() => setHoveredBeat(beat.id)}
+        onMouseLeave={() => {
+          setHoveredBeat(null);
+          setDropdownBeatId(null);
+        }}
+      >
         <img
           src={`${CLOUDINARY_BASE}${beat.image}`}
-          alt="cover"
+          alt={beat.title}
           className="w-full h-full object-cover"
         />
-        <div className="text absolute top-0 left-0 text-white p-5">
-          <h3 className="text-xl font-semibold">{beat.title}</h3>
-          <span className="text-gray-400">{beat.producer}</span>
+        {/* Overlay for track details */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
+          <h3 className="text-xl font-semibold text-white">{beat.title}</h3>
+          <span className="block text-md text-gray-200">
+            by {beat.producer} producer
+          </span>
+          <span className="block text-sm text-gray-200">
+            Genre: {beat.genre}
+          </span>
+          <span className="block text-sm text-gray-200">
+            Price: Ksh. {beat.price}
+          </span>
         </div>
-        {/* Overlay play button */}
-        <div
-          className="overlay icon absolute top-1/2 left-[40%] text-white cursor-pointer"
-          onClick={() => handlePlayPause(beat.id)}
-        >
-          {activeBeat === beat.id && isPlaying ? (
-            <PauseCircle size={50} style={{ opacity: 0.7 }} />
-          ) : (
-            <BsPlayCircle size={45} className="show" />
-          )}
-        </div>
+        {/* Centered overlay with play/pause button */}
+        {hoveredBeat === beat.id && (
+          <div
+            className="overlay icon absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-white cursor-pointer"
+            onClick={() => handlePlayPause(beat.id)}
+          >
+            {activeBeat === beat.id && isPlaying ? (
+              <PauseCircle size={50} style={{ opacity: 0.7 }} />
+            ) : (
+              <BsPlayCircle size={45} />
+            )}
+          </div>
+        )}
+        {/* Bottom-right icons overlay */}
         <div className="overlay absolute bottom-0 right-0 text-white">
-          <div className="flex p-3">
-            <AiOutlineHeart size={22} className="mx-3" />
-            <BsThreeDots size={22} />
+          <div className="flex p-3 space-x-3">
+            <AiOutlineHeart size={22} className="cursor-pointer" />
+            <div className="relative">
+              <BsThreeDots
+                size={22}
+                className="cursor-pointer"
+                onClick={() => toggleDropdown(beat.id)}
+              />
+              {dropdownBeatId === beat.id && (
+                <div className="absolute right-0 mt-2 w-32 bg-white text-black rounded shadow-lg z-10">
+                  <Link
+                    to={`/beat/${beat.id}`}
+                    className="block px-4 py-2 hover:bg-gray-200"
+                    onClick={() => setDropdownBeatId(null)}
+                  >
+                    View Details
+                  </Link>
+                </div>
+              )}
+            </div>
+            <FiShoppingCart
+              size={22}
+              className="cursor-pointer"
+              onClick={() => {
+                // Assuming addToCart function is available similarly as before.
+                // If needed, you can dispatch addToCart here.
+              }}
+            />
           </div>
         </div>
         {/* Hidden Audio Element */}
@@ -172,7 +225,7 @@ export const Hero = () => {
     );
   };
 
-  // Slider settings remain the same as your sample (one slide per view).
+  // Slider settings (one slide per view).
   const settings = {
     dots: false,
     infinite: true,
@@ -192,13 +245,12 @@ export const Hero = () => {
             {sliderBeats.map((beat) => renderBeat(beat, "slider"))}
           </Slider>
         </div>
-
         {/* Right Grid */}
         <div className="w-full md:w-1/2 grid grid-cols-2 grid-rows-2 h-[92vh] sm:grid-cols-1 sm:grid-rows-4">
           {gridBeats.map((beat) => renderBeat(beat, "grid"))}
         </div>
       </div>
-      {/* Audio Player Time Scale */}
+      {/* Audio Player */}
       {showPlayer && (
         <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center">
           <button onClick={() => handlePlayPause(activeBeat)} className="mr-4">
