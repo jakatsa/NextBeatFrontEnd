@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getBeats } from "../../store/BeatSlice";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -10,6 +10,7 @@ import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import { useAudioPlayer } from "../../context/GlobalAudioPlayerContext"; // use global audio player
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
 
@@ -41,82 +42,27 @@ function SamplePrevArrow(props) {
 export const Hero = () => {
   const dispatch = useDispatch();
   const { data: beats } = useSelector((state) => state.beat);
-  const [activeBeat, setActiveBeat] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [showPlayer, setShowPlayer] = useState(false);
-  const currentAudio = useRef(null);
-  // For hover and dropdown in hero cards.
   const [hoveredBeat, setHoveredBeat] = useState(null);
   const [dropdownBeatId, setDropdownBeatId] = useState(null);
+
+  // Use global audio player context.
+  const { playTrack, activeBeat, isPlaying } = useAudioPlayer();
 
   // Fetch beats on mount.
   useEffect(() => {
     dispatch(getBeats());
   }, [dispatch]);
 
-  // Updated splitting:
-  // First three beats for the slider; the rest go to the grid.
+  // Updated splitting: first three beats for slider; rest for grid.
   const sliderBeats = beats.slice(0, 3);
   const gridBeats = beats.slice(3);
 
-  const handlePlayPause = (beatId) => {
-    const audioElement = document.getElementById(`audio-${beatId}`);
-    if (!audioElement) return;
-
-    // Pause any other audio.
-    if (currentAudio.current && currentAudio.current !== audioElement) {
-      currentAudio.current.pause();
-    }
-
-    if (audioElement.paused) {
-      audioElement
-        .play()
-        .then(() => {
-          currentAudio.current = audioElement;
-          setActiveBeat(beatId);
-          setIsPlaying(true);
-          setShowPlayer(true);
-        })
-        .catch((error) => {
-          console.error("Error playing audio:", error);
-        });
-    } else {
-      audioElement.pause();
-      setIsPlaying(false);
-      setActiveBeat(beatId);
-    }
-  };
-
-  const handleTimeUpdate = (e) => {
-    const audio = e.target;
-    setCurrentTime(audio.currentTime);
-    setProgress((audio.currentTime / audio.duration) * 100);
-  };
-
-  const handleLoadedMetadata = (e) => {
-    const audio = e.target;
-    setDuration(audio.duration);
-  };
-
-  const handleSeek = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (currentAudio.current) {
-      const boundingRect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - boundingRect.left;
-      const newTime =
-        (clickX / boundingRect.width) * currentAudio.current.duration;
-      currentAudio.current.currentTime = newTime;
-    }
-  };
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  // When a user clicks play, call the global playTrack.
+  const handlePlayPause = (beat) => {
+    playTrack({
+      src: `${CLOUDINARY_BASE}${beat.audio_file}`,
+      beatId: beat.id,
+    });
   };
 
   // Toggle dropdown for three-dots icon.
@@ -125,7 +71,7 @@ export const Hero = () => {
   };
 
   // Render function for a beat card in the hero section.
-  // The "variant" parameter defines layout: "slider" for the left slider, "grid" for the right grid.
+  // The "variant" parameter defines layout: "slider" for left slider, "grid" for right grid.
   const renderBeat = (beat, variant = "slider") => {
     const containerClasses =
       variant === "slider"
@@ -163,7 +109,7 @@ export const Hero = () => {
         {hoveredBeat === beat.id && (
           <div
             className="overlay icon absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-white cursor-pointer"
-            onClick={() => handlePlayPause(beat.id)}
+            onClick={() => handlePlayPause(beat)}
           >
             {activeBeat === beat.id && isPlaying ? (
               <PauseCircle size={50} style={{ opacity: 0.7 }} />
@@ -198,29 +144,11 @@ export const Hero = () => {
               size={22}
               className="cursor-pointer"
               onClick={() => {
-                // Assuming addToCart function is available similarly as before.
-                // If needed, you can dispatch addToCart here.
+                // Add cart functionality if needed.
               }}
             />
           </div>
         </div>
-        {/* Hidden Audio Element */}
-        {beat.audio_file && (
-          <audio
-            id={`audio-${beat.id}`}
-            preload="auto"
-            crossOrigin="anonymous"
-            onTimeUpdate={handleTimeUpdate}
-            onLoadedMetadata={handleLoadedMetadata}
-            style={{ display: "none" }}
-          >
-            <source
-              src={`${CLOUDINARY_BASE}${beat.audio_file}`}
-              type="audio/mpeg"
-            />
-            Your browser does not support the audio tag.
-          </audio>
-        )}
       </div>
     );
   };
@@ -250,25 +178,7 @@ export const Hero = () => {
           {gridBeats.map((beat) => renderBeat(beat, "grid"))}
         </div>
       </div>
-      {/* Audio Player */}
-      {showPlayer && (
-        <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center">
-          <button onClick={() => handlePlayPause(activeBeat)} className="mr-4">
-            {isPlaying ? <PauseCircle size={40} /> : <PlayCircle size={40} />}
-          </button>
-          <span className="mr-2">{formatTime(currentTime)}</span>
-          <div
-            className="w-full bg-gray-600 h-2 rounded-full overflow-hidden relative cursor-pointer"
-            onClick={handleSeek}
-          >
-            <div
-              className="bg-blue-500 h-full"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <span className="ml-2">{formatTime(duration)}</span>
-        </div>
-      )}
+      {/* Note: The global audio player is rendered globally and not within this component */}
     </section>
   );
 };

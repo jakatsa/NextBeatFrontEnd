@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { add } from "../../store/CartSlice";
 import { getBeats } from "../../store/BeatSlice";
@@ -7,6 +7,7 @@ import { PlayCircle, PauseCircle } from "lucide-react";
 import { AiOutlineHeart } from "react-icons/ai";
 import { BsPlayCircle, BsThreeDots } from "react-icons/bs";
 import { FiShoppingCart } from "react-icons/fi"; // added cart icon
+import { useAudioPlayer } from "../../context/GlobalAudioPlayerContext"; // use global audio player
 
 console.log("all beats loaded");
 
@@ -15,103 +16,31 @@ const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
 export const AllBeatsPage = () => {
   const dispatch = useDispatch();
   const { data: beats } = useSelector((state) => state.beat);
-  const currentAudio = useRef(null);
-
-  const [activeBeat, setActiveBeat] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [hoveredBeat, setHoveredBeat] = useState(null);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [showPlayer, setShowPlayer] = useState(false);
-  // New state for tracking which beat's dropdown is open
+  // State for tracking which beat's dropdown is open.
   const [dropdownBeatId, setDropdownBeatId] = useState(null);
+
+  // Use global audio player context.
+  const { playTrack, activeBeat, isPlaying } = useAudioPlayer();
 
   useEffect(() => {
     dispatch(getBeats());
   }, [dispatch]);
-
-  const handlePlayPause = (beatId) => {
-    let id = beatId || activeBeat;
-    if (!id && currentAudio.current) {
-      id = currentAudio.current.id.split("-")[1];
-      console.log("handlePlayPause: Using id from currentAudio:", id);
-    }
-    if (!id) {
-      console.log("No valid id found. Exiting handlePlayPause.");
-      return;
-    }
-    const audioElement = document.getElementById(`audio-${id}`);
-    if (!audioElement) {
-      console.log("No audio element found for id:", id);
-      return;
-    }
-    console.log("handlePlayPause called", {
-      beatId,
-      determinedId: id,
-      activeBeat,
-      isPlaying,
-    });
-
-    // Pause any other audio that might be playing
-    if (currentAudio.current && currentAudio.current !== audioElement) {
-      currentAudio.current.pause();
-    }
-
-    if (audioElement.paused) {
-      audioElement
-        .play()
-        .then(() => {
-          currentAudio.current = audioElement;
-          setActiveBeat(id);
-          setIsPlaying(true);
-          setShowPlayer(true);
-        })
-        .catch((error) => {
-          console.error("Error playing audio: ", error);
-        });
-    } else {
-      audioElement.pause();
-      setIsPlaying(false);
-      setActiveBeat(id);
-    }
-  };
-
-  const handleTimeUpdate = (e) => {
-    const audio = e.target;
-    setCurrentTime(audio.currentTime);
-    setProgress((audio.currentTime / audio.duration) * 100);
-  };
-
-  const handleLoadedMetadata = (e) => {
-    const audio = e.target;
-    setDuration(audio.duration);
-  };
-
-  const handleSeek = (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    if (currentAudio.current) {
-      const boundingRect = e.currentTarget.getBoundingClientRect();
-      const clickX = e.clientX - boundingRect.left;
-      const newTime =
-        (clickX / boundingRect.width) * currentAudio.current.duration;
-      currentAudio.current.currentTime = newTime;
-    }
-  };
-
-  const formatTime = (time) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
 
   const addToCart = (beat) => {
     console.log("Adding beat to cart:", beat);
     dispatch(add(beat));
   };
 
-  // Toggle dropdown for the three-dots icon
+  // Instead of local handlePlayPause, call global playTrack.
+  const handlePlayPause = (beat) => {
+    playTrack({
+      src: `${CLOUDINARY_BASE}${beat.audio_file}`,
+      beatId: beat.id,
+    });
+  };
+
+  // Toggle dropdown for the three-dots icon.
   const toggleDropdown = (beatId) => {
     setDropdownBeatId((prev) => (prev === beatId ? null : beatId));
   };
@@ -149,9 +78,9 @@ export const AllBeatsPage = () => {
               </div>
               {/* Centered play/pause overlay */}
               {hoveredBeat === beat.id && (
-                <div className="overlay absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-white">
+                <div className="absolute top-1/2 left-[40%] transform -translate-x-1/2 -translate-y-1/2 text-white">
                   <button
-                    onClick={() => handlePlayPause(beat.id)}
+                    onClick={() => handlePlayPause(beat)}
                     className="flex items-center justify-center bg-black bg-opacity-30 rounded-full p-2"
                   >
                     {activeBeat === beat.id && isPlaying ? (
@@ -163,7 +92,7 @@ export const AllBeatsPage = () => {
                 </div>
               )}
               {/* Bottom-right icons overlay */}
-              <div className="overlay absolute bottom-0 right-0 text-white">
+              <div className="absolute bottom-0 right-0 text-white">
                 <div className="flex p-3 space-x-3">
                   <AiOutlineHeart size={22} className="cursor-pointer" />
                   <div className="relative">
@@ -191,42 +120,10 @@ export const AllBeatsPage = () => {
                   />
                 </div>
               </div>
-              {/* Hidden Audio Element */}
-              <audio
-                id={`audio-${beat.id}`}
-                preload="auto"
-                crossOrigin="anonymous"
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-              >
-                <source
-                  src={`${CLOUDINARY_BASE}${beat.audio_file}`}
-                  type="audio/mpeg"
-                />
-                Your browser does not support the audio tag.
-              </audio>
             </div>
           </div>
         ))}
       </div>
-      {showPlayer && (
-        <div className="fixed bottom-0 left-0 w-full bg-gray-800 text-white p-4 flex items-center">
-          <button onClick={() => handlePlayPause(activeBeat)} className="mr-4">
-            {isPlaying ? <PauseCircle size={40} /> : <PlayCircle size={40} />}
-          </button>
-          <span className="mr-2">{formatTime(currentTime)}</span>
-          <div
-            className="w-full bg-gray-600 h-2 rounded-full overflow-hidden relative cursor-pointer"
-            onClick={handleSeek}
-          >
-            <div
-              className="bg-blue-500 h-full"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-          <span className="ml-2">{formatTime(duration)}</span>
-        </div>
-      )}
     </div>
   );
 };

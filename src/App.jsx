@@ -35,6 +35,10 @@ import Trial from "./components/Pages/Trial";
 import Layout from "./components/styles/Layout";
 import { AiOutlineMenu, AiOutlineSearch } from "react-icons/ai";
 
+// Import Global Audio Player components
+import { AudioPlayerProvider } from "./context/GlobalAudioPlayerContext";
+import GlobalAudioPlayer from "./context/GlobalAudioPlayer";
+
 function AppContent() {
   const { user, logoutUser } = useContext(AuthContext);
   const [query, setQuery] = useState("");
@@ -89,7 +93,6 @@ function AppContent() {
               <span className="text-2xl font-semibold ml-3">BeatRoot</span>
             </NavLink>
           </div>
-
           {/* Navlinks */}
           <ul className="flex items-center space-x-8">
             <li>
@@ -102,8 +105,6 @@ function AppContent() {
                 Home
               </NavLink>
             </li>
-
-            {/* For producers: show "Buy Beats?" */}
             {user && user.role === "producer" && (
               <li>
                 <NavLink
@@ -116,8 +117,6 @@ function AppContent() {
                 </NavLink>
               </li>
             )}
-
-            {/* For clients: show Cart, Sell Beats?, and Producers */}
             {user && user.role === "client" && (
               <>
                 <li>
@@ -152,7 +151,6 @@ function AppContent() {
                 </li>
               </>
             )}
-
             {user ? (
               <li>
                 <button
@@ -187,7 +185,6 @@ function AppContent() {
               </>
             )}
           </ul>
-
           {/* Search */}
           <div className="flex items-center">
             <form onSubmit={handleSearch} className="relative">
@@ -205,10 +202,8 @@ function AppContent() {
             </form>
           </div>
         </div>
-
         {/* Mobile */}
         <div className="flex items-center justify-between md:hidden h-full pl-2 pr-8">
-          {/* Logo and Home */}
           <NavLink to={homeRoute} className="flex items-center gap-2">
             <img
               src="https://flowbite.com/docs/images/logo.svg"
@@ -218,8 +213,6 @@ function AppContent() {
             />
             <span className="text-2xl font-semibold">BeatRoot</span>
           </NavLink>
-
-          {/* Mobile Menu Toggle */}
           <div className="relative">
             <AiOutlineMenu
               size={20}
@@ -240,7 +233,6 @@ function AppContent() {
                       Home
                     </NavLink>
                   </li>
-
                   {user && user.role === "producer" && (
                     <li className="py-2">
                       <NavLink
@@ -254,7 +246,6 @@ function AppContent() {
                       </NavLink>
                     </li>
                   )}
-
                   {user && user.role === "client" && (
                     <>
                       <li className="py-2">
@@ -292,7 +283,6 @@ function AppContent() {
                       </li>
                     </>
                   )}
-
                   <li className="py-2">
                     {user ? (
                       <button
@@ -361,10 +351,8 @@ function AppContent() {
           <Route path="/Login" element={<Login />} />
           <Route path="/ClientLogin" element={<ClientLogin />} />
           <Route path="/Register" element={<Register />} />
-
           {/* Route for Producers page */}
           <Route path="/Producers" element={<div>Producers List</div>} />
-
           <Route element={<PrivateRoute />}>
             <Route
               path="/ClientHomepage"
@@ -392,7 +380,10 @@ function AppContent() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <AudioPlayerProvider>
+        <AppContent />
+        <GlobalAudioPlayer />
+      </AudioPlayerProvider>
     </AuthProvider>
   );
 }
