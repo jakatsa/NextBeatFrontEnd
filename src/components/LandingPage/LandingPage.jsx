@@ -23,9 +23,9 @@ export const LandingPage = () => {
         <CategoryList />
       </Suspense>
 
-      <Suspense fallback={<div>Loading Beats...</div>}>
+      {/* <Suspense fallback={<div>Loading Beats...</div>}>
         <AllBeatsPage />
-      </Suspense>
+      </Suspense> */}
     </div>
   );
 };
