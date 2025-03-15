@@ -37,7 +37,7 @@ import { AiOutlineMenu, AiOutlineSearch } from "react-icons/ai";
 
 // Import Global Audio Player components
 import { AudioPlayerProvider } from "./context/GlobalAudioPlayerContext";
-import GlobalAudioPlayer from "./context/GlobalAudioPlayer";
+import GlobalAudioPlayer from "./components/AudioPlayer/GlobalAudioPlayer";
 
 function AppContent() {
   const { user, logoutUser } = useContext(AuthContext);
@@ -325,7 +325,7 @@ function AppContent() {
       </header>
 
       {/* Routes */}
-      <div className="pt-[12vh]">
+      <div className="pt-[12vh] pb-[80px]">
         <Routes>
           <Route path="/" element={<Navigate to="/LandingPage" />} />
           <Route

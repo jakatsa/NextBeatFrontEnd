@@ -1,6 +1,6 @@
 import React from "react";
 import { PauseCircle, PlayCircle } from "lucide-react";
-import { useAudioPlayer } from "./GlobalAudioPlayerContext";
+import { useAudioPlayer } from "../../context/GlobalAudioPlayerContext";
 
 const GlobalAudioPlayer = () => {
   const {
