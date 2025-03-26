@@ -10,11 +10,10 @@ import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { useAudioPlayer } from "../../context/GlobalAudioPlayerContext"; // use global audio player
+import { useAudioPlayer } from "../../context/GlobalAudioPlayerContext";
 
 const CLOUDINARY_BASE = "https://res.cloudinary.com/dqmbquytc/";
 
-// Arrow components for slider navigation.
 function SampleNextArrow(props) {
   const { onClick } = props;
   return (
@@ -167,18 +166,16 @@ export const Hero = () => {
   return (
     <section className="hero">
       <div className="w-full h-auto md:h-[92vh] md:flex md:justify-between">
-        {/* Left Slider */}
         <div className="w-full h-full md:w-1/2">
           <Slider {...settings}>
             {sliderBeats.map((beat) => renderBeat(beat, "slider"))}
           </Slider>
         </div>
-        {/* Right Grid */}
+
         <div className="w-full md:w-1/2 grid grid-cols-2 grid-rows-2 h-[92vh] sm:grid-cols-1 sm:grid-rows-4">
           {gridBeats.map((beat) => renderBeat(beat, "grid"))}
         </div>
       </div>
-      {/* Note: The global audio player is rendered globally and not within this component */}
     </section>
   );
 };

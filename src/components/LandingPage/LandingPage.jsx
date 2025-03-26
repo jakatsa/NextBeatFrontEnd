@@ -1,7 +1,6 @@
 import React, { Suspense } from "react";
 import { Hero } from "../SharedPages/Hero";
-
-// Lazy load the components with named export handling
+import { Link } from "react-router-dom";
 const CategoryList = React.lazy(() =>
   import("../CategoryList/CategoryList").then((module) => ({
     default: module.CategoryList,
@@ -17,6 +16,15 @@ const AllBeatsPage = React.lazy(() =>
 export const LandingPage = () => {
   return (
     <div>
+      <h1>Hello thank you for visiting my beatstore</h1>
+      <h1>
+        Unfortunately my db on render is expired currently working on a solution
+        thank you for your paitence{" "}
+      </h1>
+      <Link to="https://github.com/jakatsa/NextBeatFrontEnd">
+        <h1>Repositroy link</h1>
+      </Link>
+
       <Hero />
 
       <Suspense fallback={<div>Loading Category List...</div>}>

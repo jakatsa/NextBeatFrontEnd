@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, Suspense } from "react";
 import {
   NavLink,
   Link,
@@ -11,33 +11,82 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import Swal from "sweetalert2";
 
-// Import your components and pages
-import { ClientHomepage } from "./components/UserAuth/ClientHomepage";
-import { ProducerHomePage } from "./components/UserAuth/ProducerHomePage";
-import Register from "./components/UserAuth/Register";
-import { Login } from "./components/UserAuth/Login";
-import ClientLogin from "./components/UserAuth/ClientLogin";
+// Lazy load your components and pages
+const ClientHomepage = React.lazy(() =>
+  import("./components/UserAuth/ClientHomepage").then((module) => ({
+    default: module.ClientHomepage,
+  }))
+);
+const ProducerHomePage = React.lazy(() =>
+  import("./components/UserAuth/ProducerHomePage").then((module) => ({
+    default: module.ProducerHomePage,
+  }))
+);
+const Register = React.lazy(() => import("./components/UserAuth/Register"));
+const Login = React.lazy(() =>
+  import("./components/UserAuth/Login").then((module) => ({
+    default: module.Login,
+  }))
+);
+const ClientLogin = React.lazy(() =>
+  import("./components/UserAuth/ClientLogin")
+);
+const LandingPage = React.lazy(() =>
+  import("./components/LandingPage/LandingPage").then((module) => ({
+    default: module.LandingPage,
+  }))
+);
+const BeatCard = React.lazy(() =>
+  import("./components/BeatCard/BeatCard").then((module) => ({
+    default: module.BeatCard,
+  }))
+);
+const BeatDetails = React.lazy(() =>
+  import("./components/BeatDetails/BeatDetails").then((module) => ({
+    default: module.BeatDetails,
+  }))
+);
+const Cart = React.lazy(() =>
+  import("./components/Cart/Cart").then((module) => ({
+    default: module.Cart,
+  }))
+);
+const CategoryList = React.lazy(() =>
+  import("./components/CategoryList/CategoryList").then((module) => ({
+    default: module.CategoryList,
+  }))
+);
+const SearchResults = React.lazy(() =>
+  import("./components/SearchResults/SearchResults").then((module) => ({
+    default: module.SearchResults,
+  }))
+);
+const CategoryPage = React.lazy(() =>
+  import("./components/CategoryPage/CategoryPage")
+);
+const ClientRegistration = React.lazy(() =>
+  import("./components/UserAuth/ClientRegistration").then((module) => ({
+    default: module.ClientRegistration,
+  }))
+);
+const ProducerRegistration = React.lazy(() =>
+  import("./components/UserAuth/ProducerRegistration").then((module) => ({
+    default: module.ProducerRegistration,
+  }))
+);
+const Trial = React.lazy(() => import("./components/Pages/Trial"));
+const Layout = React.lazy(() => import("./components/styles/Layout"));
+const GlobalAudioPlayer = React.lazy(() =>
+  import("./components/AudioPlayer/GlobalAudioPlayer")
+);
+
+// Non-lazy imports (utilities, contexts, icons)
 import PrivateRoute from "./utils/PrivateRoute";
+import RoleBasedRoute from "./utils/RoleBasedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import AuthContext from "./context/AuthContext";
-import { LandingPage } from "./components/LandingPage/LandingPage";
-import { BeatCard } from "./components/BeatCard/BeatCard";
-import { BeatDetails } from "./components/BeatDetails/BeatDetails";
-import { Cart } from "./components/Cart/Cart";
-import { CategoryList } from "./components/CategoryList/CategoryList";
-import { SearchResults } from "./components/SearchResults/SearchResults";
-import CategoryPage from "./components/CategoryPage/CategoryPage";
-import { fetchSearchResults } from "./store/SearchSlice";
-import { ClientRegistration } from "./components/UserAuth/ClientRegistration";
-import { ProducerRegistration } from "./components/UserAuth/ProducerRegistration";
-import RoleBasedRoute from "./utils/RoleBasedRoute";
-import Trial from "./components/Pages/Trial";
-import Layout from "./components/styles/Layout";
 import { AiOutlineMenu, AiOutlineSearch } from "react-icons/ai";
-
-// Import Global Audio Player components
 import { AudioPlayerProvider } from "./context/GlobalAudioPlayerContext";
-import GlobalAudioPlayer from "./components/AudioPlayer/GlobalAudioPlayer";
 
 function AppContent() {
   const { user, logoutUser } = useContext(AuthContext);
@@ -326,52 +375,57 @@ function AppContent() {
 
       {/* Routes */}
       <div className="pt-[12vh] pb-[80px]">
-        <Routes>
-          <Route path="/" element={<Navigate to="/LandingPage" />} />
-          <Route
-            path="/LandingPage"
-            element={
-              <Layout>
-                <LandingPage />
-              </Layout>
-            }
-          />
-          <Route path="/BeatCard" element={<BeatCard />} />
-          <Route path="/Cart" element={<Cart />} />
-          <Route path="/Search" element={<SearchResults query={query} />} />
-          <Route path="/" element={<CategoryList />} />
-          <Route path="/categories/:slug" element={<CategoryPage />} />
-          <Route path="/beat/:id" element={<BeatDetails />} />
-          <Route path="/ClientRegistration" element={<ClientRegistration />} />
-          <Route path="/trial" element={<Trial />} />
-          <Route
-            path="/ProducerRegistration"
-            element={<ProducerRegistration />}
-          />
-          <Route path="/Login" element={<Login />} />
-          <Route path="/ClientLogin" element={<ClientLogin />} />
-          <Route path="/Register" element={<Register />} />
-          {/* Route for Producers page */}
-          <Route path="/Producers" element={<div>Producers List</div>} />
-          <Route element={<PrivateRoute />}>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/LandingPage" />} />
             <Route
-              path="/ClientHomepage"
+              path="/LandingPage"
               element={
-                <RoleBasedRoute allowedRoles={["client"]}>
-                  <ClientHomepage />
-                </RoleBasedRoute>
+                <Layout>
+                  <LandingPage />
+                </Layout>
               }
             />
+            <Route path="/BeatCard" element={<BeatCard />} />
+            <Route path="/Cart" element={<Cart />} />
+            <Route path="/Search" element={<SearchResults query={query} />} />
+            <Route path="/" element={<CategoryList />} />
+            <Route path="/categories/:slug" element={<CategoryPage />} />
+            <Route path="/beat/:id" element={<BeatDetails />} />
             <Route
-              path="/ProducerHomePage"
-              element={
-                <RoleBasedRoute allowedRoles={["producer"]}>
-                  <ProducerHomePage />
-                </RoleBasedRoute>
-              }
+              path="/ClientRegistration"
+              element={<ClientRegistration />}
             />
-          </Route>
-        </Routes>
+            <Route path="/trial" element={<Trial />} />
+            <Route
+              path="/ProducerRegistration"
+              element={<ProducerRegistration />}
+            />
+            <Route path="/Login" element={<Login />} />
+            <Route path="/ClientLogin" element={<ClientLogin />} />
+            <Route path="/Register" element={<Register />} />
+            {/* Route for Producers page */}
+            <Route path="/Producers" element={<div>Producers List</div>} />
+            <Route element={<PrivateRoute />}>
+              <Route
+                path="/ClientHomepage"
+                element={
+                  <RoleBasedRoute allowedRoles={["client"]}>
+                    <ClientHomepage />
+                  </RoleBasedRoute>
+                }
+              />
+              <Route
+                path="/ProducerHomePage"
+                element={
+                  <RoleBasedRoute allowedRoles={["producer"]}>
+                    <ProducerHomePage />
+                  </RoleBasedRoute>
+                }
+              />
+            </Route>
+          </Routes>
+        </Suspense>
       </div>
     </>
   );

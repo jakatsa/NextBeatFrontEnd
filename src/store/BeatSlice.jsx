@@ -11,15 +11,11 @@ export const addBeat = createAsyncThunk(
   "beat/add",
   async (formData, { rejectWithValue }) => {
     try {
-      const response = await fetch(
-        "https://nextbeatbackend.onrender.com/beats/api/beat/",
-        {
-          method: "POST",
-          body: formData,
-          credentials: "include", // Ensures cookies are sent automatically
-          // Do NOT set a manual Content-Type header when sending FormData!
-        }
-      );
+      const response = await fetch("http://127.0.0.1:8000/beats/api/beat/", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
       if (!response.ok) {
         throw new Error("Failed to add beat");
@@ -35,16 +31,15 @@ export const addBeat = createAsyncThunk(
 
 export const getBeats = createAsyncThunk("beat/get", async () => {
   const data = await fetch(
-    "https://nextbeatbackend.onrender.com/beats/api/beat/"
+    " http://127.0.0.1:8000/beats/api/beat/"
+    // "https://nextbeatbackend.onrender.com/beats/api/beat/"
   );
   const result = await data.json();
   return result;
 });
 
 export const getBeatById = createAsyncThunk("beat/getById", async (id) => {
-  const response = await fetch(
-    `https://nextbeatbackend.onrender.com/beats/api/beat/${id}/`
-  );
+  const response = await fetch(`http://127.0.0.1:8000/beats/api/beat/${id}/`);
   const result = await response.json();
   return result;
 });
