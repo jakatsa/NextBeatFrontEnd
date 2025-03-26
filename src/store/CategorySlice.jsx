@@ -2,7 +2,9 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
 // Async thunk to fetch categories
 export const getCategories = createAsyncThunk("categories/get", async () => {
-  const data = await fetch("http://127.0.0.1:8000/beats/api/categories/");
+  const data = await fetch(
+    "https://nextbeatbackend.onrender.com/beats/api/categories/"
+  );
   const result = await data.json();
   return result;
 });
