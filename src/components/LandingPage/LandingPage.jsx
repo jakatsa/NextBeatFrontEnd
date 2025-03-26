@@ -19,7 +19,7 @@ export const LandingPage = () => {
       <h1>Hello thank you for visiting my beatstore</h1>
       <h1>
         Unfortunately my db on render is expired currently working on a solution
-        thank you for your paitence{" "}
+        thank you again for your paitence{" "}
       </h1>
       <Link to="https://github.com/jakatsa/NextBeatFrontEnd">
         <h1>Repositroy link</h1>
